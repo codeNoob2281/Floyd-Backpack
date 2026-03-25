@@ -1,0 +1,15 @@
+name: FloydBackpack
+version: '1.0.0-SNAPSHOT'
+main: com.floyd.backpack.FloydBackpackPlugin
+api-version: '1.21'
+prefix: Floyd-Backpack
+load: STARTUP
+authors: [ floyd ]
+description: floyd背包插件
+website: https://github.com/codeNoob2281
+commands:
+  backpack:
+    aliases:
+      - bp
+    description: 打开背包
+    usage:
