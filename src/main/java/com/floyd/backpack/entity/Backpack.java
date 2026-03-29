@@ -33,6 +33,9 @@ public class Backpack implements InventoryHolder {
     }
 
     public Backpack(String playerUuid, String playerName, int size) {
+        if (size <= 0 || size % 9 != 0) {
+            throw new IllegalArgumentException("illegal size: " + size);
+        }
         this.playerUuid = playerUuid;
         this.playerName = playerName;
         this.size = size;

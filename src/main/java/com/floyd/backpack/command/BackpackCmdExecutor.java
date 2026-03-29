@@ -1,9 +1,9 @@
 package com.floyd.backpack.command;
 
 import com.floyd.backpack.entity.Backpack;
+import com.floyd.backpack.service.BackpackCmdService;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.core.FloydPlugin;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -15,6 +15,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.springframework.aop.framework.AopContext;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,69 +29,19 @@ import java.util.Objects;
  */
 public class BackpackCmdExecutor implements CommandExecutor, TabCompleter {
 
+    @Autowired
+    private BackpackCmdService backpackCmdService;
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String @NotNull [] args) {
         if (args.length == 0 || "open".equals(args[0])) {
-            if (checkIsPlayer(sender)) {
-                // 打开背包
-                openBackpack(sender);
-                sender.sendMessage(Component.text("已为您打开背包", NamedTextColor.GREEN));
-                return true;
-            }
-            return false;
+            return backpackCmdService.onOpenBackpackCmd(sender);
         } else if ("clear".equals(args[0])) {
-            if (!checkIsPlayer(sender)) {
-                return false;
-            }
-            if (args.length == 1) {
-                //  二次确认清空背包
-                sender.sendMessage(Component.text("是否确认删除背包？请注意这是一个不可逆的操作", NamedTextColor.GOLD));
-                sender.sendMessage(ChatColor.GOLD + "输入 " + ChatColor.RED + "/bp clear confirm" + ChatColor.GOLD + " 确认");
-                sender.sendMessage(ChatColor.GOLD + "输入 " + ChatColor.RED + "/bp clear cancel" + ChatColor.GOLD + " 取消");
-                return true;
-            } else {
-                if ("confirm".equals(args[1])) {
-                    int clearItemSize = clearBackpack(sender);
-                    sender.sendMessage(ChatColor.GREEN + "已清空背包，共移除" + ChatColor.RED + clearItemSize + ChatColor.GREEN + "件物品");
-                    FloydPlugin.logger().info("清空[" + sender.getName() + "]的背包，共移除[" + clearItemSize + "]件物品");
-                    return true;
-                } else {
-                    sender.sendMessage(Component.text("清空背包操作已取消", NamedTextColor.YELLOW));
-                    return true;
-                }
-            }
+            return backpackCmdService.onClearBackpackCmd(sender, args);
+        } else {
+            return backpackCmdService.onErrorCmd(sender);
         }
-        sender.sendMessage(Component.text("[" + FloydPlugin.instance().getPluginName() + "] 命令使用方法", NamedTextColor.AQUA));
-        sender.sendMessage(Component.text("------------------------------------", NamedTextColor.GRAY));
-        sender.sendMessage(ChatColor.GRAY + "/bp open" + ChatColor.AQUA + " -> 打开背包");
-        sender.sendMessage(ChatColor.GRAY + "/bp clear" + ChatColor.AQUA + " -> 清空背包");
-        sender.sendMessage(Component.text("------------------------------------", NamedTextColor.GRAY));
-        return false;
-    }
-
-    private boolean checkIsPlayer(CommandSender sender) {
-        if (sender instanceof Player) {
-            return true;
-        }
-        sender.sendMessage(Component.text("无法通过控制台执行此命令", NamedTextColor.RED));
-        return false;
-    }
-
-    private void openBackpack(CommandSender sender) {
-        Player player = (Player) sender;
-        Backpack backpack = PlayerBackpackManager.getBackpack(player);
-        player.openInventory(backpack.getInventory());
-    }
-
-    private int clearBackpack(@NotNull CommandSender sender) {
-        Player player = (Player) sender;
-        Backpack backpack = PlayerBackpackManager.getBackpack(player);
-        Inventory inventory = backpack.getInventory();
-        List<ItemStack> itemStackList = Arrays.stream(inventory.getStorageContents())
-                .filter(Objects::nonNull).toList();
-        inventory.clear();
-        return itemStackList.size();
     }
 
 

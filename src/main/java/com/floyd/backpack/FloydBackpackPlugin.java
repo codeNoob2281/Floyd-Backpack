@@ -6,10 +6,15 @@ import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.core.FloydPlugin;
 import com.floyd.core.PluginBizException;
 import org.bukkit.Bukkit;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  *
@@ -19,7 +24,8 @@ import java.nio.file.Paths;
  * @date 2026/03/22
  * @since 1.0.0
  */
-public final class FloydBackpackPlugin extends FloydPlugin {
+
+public class FloydBackpackPlugin extends FloydPlugin {
 
     @Override
     public String getPluginName() {
@@ -56,8 +62,8 @@ public final class FloydBackpackPlugin extends FloydPlugin {
     }
 
     @Override
-    protected Class<?>[] getConfigClasses() {
-        return new Class<?>[]{CommandRegistry.class};
+    protected List<Class<?>> getCustomConfigClasses() {
+        return Collections.singletonList(SpringApplication.class);
     }
 
     @Override
