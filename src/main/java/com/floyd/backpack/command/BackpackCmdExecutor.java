@@ -29,8 +29,11 @@ import java.util.Objects;
  */
 public class BackpackCmdExecutor implements CommandExecutor, TabCompleter {
 
-    @Autowired
-    private BackpackCmdService backpackCmdService;
+    private final BackpackCmdService backpackCmdService;
+
+    public BackpackCmdExecutor(BackpackCmdService backpackCmdService){
+        this.backpackCmdService = backpackCmdService;
+    }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
