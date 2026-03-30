@@ -104,7 +104,7 @@ public class ConfirmOperationManager implements BeanFactoryAware, InitializingBe
     @Override
     public void afterPropertiesSet() throws Exception {
         long period = Constants.SERVER_TICK_PER_SECOND * Constants.DEFAULT_EXPIRE_INTERVAL / 1000;
-        expireKeyCheckTask = Bukkit.getServer().getScheduler().runTaskTimer(FloydBackpackPlugin.instance(), () -> {
+        expireKeyCheckTask = Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(FloydBackpackPlugin.instance(), () -> {
             AtomicInteger removedKeyCount = new AtomicInteger(0);
             lastConfirmOperationTimestampMap.forEach((confirmOperation, uuidOperationMap) -> {
                 for (String existUuid : uuidOperationMap.keySet()) {
@@ -119,6 +119,10 @@ public class ConfirmOperationManager implements BeanFactoryAware, InitializingBe
                     }
                 }
             });
+            int res = removedKeyCount.get();
+            if (res > 0) {
+                FloydBackpackPlugin.logger().info(res + "个过期的二次确认信息被移除");
+            }
         }, period, period);
     }
 
