@@ -2,6 +2,7 @@ package com.floyd.backpack.service.impl;
 
 import com.floyd.backpack.FloydBackpackPlugin;
 import com.floyd.backpack.config.CmdClearBackPackConfig;
+import com.floyd.backpack.constant.PermConstant;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.enums.ConfirmOperationEnum;
 import com.floyd.backpack.service.BackpackCmdService;
@@ -41,21 +42,21 @@ public class BackpackCmdServiceImpl implements BackpackCmdService {
 
 
     @Override
-    @RequiredPermission(value = "floydbackpack.open", tipPermValue = true)
+    @RequiredPermission(value = PermConstant.OPEN_BACKPACK, tipPermValue = true)
     public boolean onOpenBackpackCmd(CommandSender sender) {
         if (checkIsPlayer(sender)) {
             // 打开背包
             openBackpack(sender);
             sender.sendMessage(Component.text("已为您打开背包", NamedTextColor.GREEN));
             return true;
-        }else {
+        } else {
             sender.sendMessage(Component.text("无法通过控制台执行此命令", NamedTextColor.RED));
         }
         return false;
     }
 
     @Override
-    @RequiredPermission(value = "floydbackpack.clear", tipPermValue = true)
+    @RequiredPermission(value = PermConstant.CLEAR_BACKPACK, tipPermValue = true)
     public boolean onClearBackpackCmd(@NonNull CommandSender sender, @NotNull String @NonNull [] args) {
         boolean isPlayer = checkIsPlayer(sender);
         if (!cmdClearBackPackConfig.isEnable()) {

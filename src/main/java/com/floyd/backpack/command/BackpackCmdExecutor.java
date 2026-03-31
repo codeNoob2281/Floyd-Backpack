@@ -1,9 +1,13 @@
 package com.floyd.backpack.command;
 
+import com.floyd.backpack.constant.Constants;
+import com.floyd.backpack.constant.PermConstant;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.service.BackpackCmdService;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.core.FloydPlugin;
+import com.floyd.core.command.CommandCompleter;
+import com.floyd.core.command.TrieCommandCompleter;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -22,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author floyd
@@ -31,8 +36,20 @@ public class BackpackCmdExecutor implements CommandExecutor, TabCompleter {
 
     private final BackpackCmdService backpackCmdService;
 
-    public BackpackCmdExecutor(BackpackCmdService backpackCmdService){
+    private final TrieCommandCompleter commandCompleter;
+
+    public BackpackCmdExecutor(BackpackCmdService backpackCmdService) {
         this.backpackCmdService = backpackCmdService;
+        this.commandCompleter = new TrieCommandCompleter();
+        initCmdCompleter();
+    }
+
+    private void initCmdCompleter() {
+        commandCompleter.addCommand("backpack");
+        commandCompleter.addCommand("backpack open", PermConstant.OPEN_BACKPACK);
+        commandCompleter.addCommand("backpack clear", PermConstant.CLEAR_BACKPACK);
+        commandCompleter.addCommand("backpack clear confirm", PermConstant.CLEAR_BACKPACK);
+        commandCompleter.addCommand("backpack clear cancel", PermConstant.CLEAR_BACKPACK);
     }
 
     @Override
@@ -51,14 +68,10 @@ public class BackpackCmdExecutor implements CommandExecutor, TabCompleter {
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
                                                 @NotNull String @NotNull [] args) {
-        List<String> argList = Arrays.stream(args)
-                .filter(arg -> !arg.isEmpty())
-                .toList();
-        if (argList.isEmpty()) {
-            return List.of("open", "clear");
-        } else if ("clear".equals(args[0])) {
-            return List.of("confirm", "cancel");
+        if (sender instanceof Player) {
+            return commandCompleter.nextArgs((Player) sender, command.getName(), args);
+        } else {
+            return commandCompleter.nextArgs(command.getName(), args);
         }
-        return List.of();
     }
 }
