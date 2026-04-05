@@ -9,6 +9,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * @author floyd
  * @date 2026/3/23
@@ -27,6 +30,12 @@ public class Backpack implements InventoryHolder {
 
     @Getter
     private final int size;
+
+    /**
+     * 背包数据同步锁，解决并发访问问题
+     */
+    @Getter
+    private final Lock lock = new ReentrantLock();
 
     public Backpack(@NotNull Player player) {
         this(player.getUniqueId().toString(), player.getName(), DEFAULT_SIZE);
