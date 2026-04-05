@@ -6,7 +6,7 @@
 
     <groupId>com.codefish.mc</groupId>
     <artifactId>floyd-backpack</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>floyd-backpack</name>
