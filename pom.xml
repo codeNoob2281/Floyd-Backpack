@@ -65,7 +65,7 @@
         <dependency>
             <groupId>com.floyd.mc</groupId>
             <artifactId>floyd-core</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <version>1.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
