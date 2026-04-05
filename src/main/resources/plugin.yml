@@ -1,5 +1,5 @@
 name: FloydBackpack
-version: '1.0.0-SNAPSHOT'
+version: '1.0.1'
 main: com.floyd.backpack.FloydBackpackPlugin
 api-version: '1.21'
 prefix: Floyd-Backpack
@@ -12,4 +12,10 @@ commands:
     aliases:
       - bp
     description: 打开背包
-    usage:
+permissions:
+  floydbackpack.open:
+    description: "允许玩家打开背包"
+    default: true
+  floydbackpack.clear:
+    description: "允许玩家清空背包"
+    default: op

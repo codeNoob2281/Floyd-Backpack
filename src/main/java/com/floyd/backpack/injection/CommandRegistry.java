@@ -1,6 +1,7 @@
 package com.floyd.backpack.injection;
 
 import com.floyd.backpack.command.BackpackCmdExecutor;
+import com.floyd.backpack.service.BackpackCmdService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 public class CommandRegistry {
 
     @Bean
-    BackpackCmdExecutor backpackCmdExecutor() {
-        return new BackpackCmdExecutor();
+    BackpackCmdExecutor backpackCmdExecutor(BackpackCmdService backpackCmdService) {
+        return new BackpackCmdExecutor(backpackCmdService);
     }
 }

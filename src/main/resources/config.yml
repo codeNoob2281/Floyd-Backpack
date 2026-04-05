@@ -1,3 +1,9 @@
 logging:
   file:
-    enable: false
+    enable: false  # 是否开启日志文件
+command:
+  backpack:
+    clear:
+      enable: true # 是否启用清空背包操作
+      need-confirm: true # 是否需要二次确认
+      confirm-interval: 30000 # 确认间隔
