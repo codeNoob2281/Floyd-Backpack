@@ -52,7 +52,8 @@ public class FloydBackpackPlugin extends FloydPlugin {
     @Override
     protected void cleanup() {
         // 保存背包数据
-        PlayerBackpackManager.saveAllBackpack();
+        PlayerBackpackManager playerBackpackManager = getApplicationContext().getBean(PlayerBackpackManager.class);
+        playerBackpackManager.saveAllBackpack();
     }
 
     private void initDataDirs() {

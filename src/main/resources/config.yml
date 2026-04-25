@@ -1,6 +1,7 @@
 logging:
   file:
     enable: false  # 是否开启日志文件
+  level: INFO
 command:
   backpack:
     clear:

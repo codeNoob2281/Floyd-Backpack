@@ -4,6 +4,9 @@ import com.floyd.backpack.FloydBackpackPlugin;
 import com.floyd.backpack.config.CmdClearBackPackConfig;
 import com.floyd.backpack.constant.Constants;
 import com.floyd.backpack.enums.ConfirmOperationEnum;
+import com.floyd.backpack.event.BackpackEventListener;
+import com.floyd.core.logging.ConsoleLogger;
+import com.floyd.core.logging.ConsoleLoggerFactory;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -29,6 +32,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @org.springframework.stereotype.Component
 public class ConfirmOperationManager implements BeanFactoryAware, InitializingBean, DisposableBean {
+
+    private static final ConsoleLogger logger = ConsoleLoggerFactory.get(ConfirmOperationManager.class);
 
     private final Map<ConfirmOperationEnum, Map<String, Long>> lastConfirmOperationTimestampMap = new ConcurrentHashMap<>(8);
 
@@ -121,7 +126,7 @@ public class ConfirmOperationManager implements BeanFactoryAware, InitializingBe
             });
             int res = removedKeyCount.get();
             if (res > 0) {
-                FloydBackpackPlugin.logger().info(res + "个过期的二次确认信息被移除");
+                logger.info(res + "个过期的二次确认信息被移除");
             }
         }, period, period);
     }

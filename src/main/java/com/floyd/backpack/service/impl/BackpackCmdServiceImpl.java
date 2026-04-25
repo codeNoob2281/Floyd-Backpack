@@ -9,6 +9,8 @@ import com.floyd.backpack.service.BackpackCmdService;
 import com.floyd.backpack.service.ConfirmOperationManager;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.core.FloydPlugin;
+import com.floyd.core.logging.ConsoleLogger;
+import com.floyd.core.logging.ConsoleLoggerFactory;
 import com.floyd.core.permission.RequiredPermission;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -30,14 +32,21 @@ import java.util.Objects;
  */
 @Service
 public class BackpackCmdServiceImpl implements BackpackCmdService {
+    
+    ConsoleLogger logger = ConsoleLoggerFactory.get(BackpackCmdServiceImpl.class);
 
     private final ConfirmOperationManager confirmOperationManager;
 
     private final CmdClearBackPackConfig cmdClearBackPackConfig;
 
-    public BackpackCmdServiceImpl(ConfirmOperationManager confirmOperationManager, CmdClearBackPackConfig cmdClearBackPackConfig) {
+    private final PlayerBackpackManager playerBackpackManager;
+
+    public BackpackCmdServiceImpl(ConfirmOperationManager confirmOperationManager,
+                                  CmdClearBackPackConfig cmdClearBackPackConfig,
+                                  PlayerBackpackManager playerBackpackManager) {
         this.confirmOperationManager = confirmOperationManager;
         this.cmdClearBackPackConfig = cmdClearBackPackConfig;
+        this.playerBackpackManager = playerBackpackManager;
     }
 
 
@@ -118,7 +127,7 @@ public class BackpackCmdServiceImpl implements BackpackCmdService {
         sender.sendMessage(Component.text("已清空背包，共移除", NamedTextColor.GREEN)
                 .append(Component.text(clearItemSize, NamedTextColor.RED))
                 .append(Component.text("件物品", NamedTextColor.GREEN)));
-        FloydPlugin.logger().info("清空 [" + sender.getName() + "] 的背包，共移除 [" + clearItemSize + "] 件物品");
+        logger.info("清空 [" + sender.getName() + "] 的背包，共移除 [" + clearItemSize + "] 件物品");
     }
 
     private static void sendClearConfirmTipMsg(@NonNull CommandSender sender) {
@@ -148,13 +157,13 @@ public class BackpackCmdServiceImpl implements BackpackCmdService {
 
     private void openBackpack(CommandSender sender) {
         Player player = (Player) sender;
-        Backpack backpack = PlayerBackpackManager.getBackpack(player);
+        Backpack backpack = playerBackpackManager.getBackpack(player);
         player.openInventory(backpack.getInventory());
     }
 
     private int clearBackpack(@NotNull CommandSender sender) {
         Player player = (Player) sender;
-        Backpack backpack = PlayerBackpackManager.getBackpack(player);
+        Backpack backpack = playerBackpackManager.getBackpack(player);
         Inventory inventory = backpack.getInventory();
         List<ItemStack> itemStackList = Arrays.stream(inventory.getStorageContents())
                 .filter(Objects::nonNull).toList();

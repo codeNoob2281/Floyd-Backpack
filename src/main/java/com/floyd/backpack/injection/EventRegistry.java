@@ -1,6 +1,7 @@
 package com.floyd.backpack.injection;
 
 import com.floyd.backpack.event.BackpackEventListener;
+import com.floyd.backpack.service.PlayerBackpackManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 public class EventRegistry {
 
     @Bean
-    BackpackEventListener backpackEventListener() {
-        return new BackpackEventListener();
+    BackpackEventListener backpackEventListener(PlayerBackpackManager playerBackpackManager) {
+        return new BackpackEventListener(playerBackpackManager);
     }
 }

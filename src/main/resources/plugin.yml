@@ -1,5 +1,5 @@
 name: FloydBackpack
-version: '1.0.1'
+version: '1.0.2'
 main: com.floyd.backpack.FloydBackpackPlugin
 api-version: '1.21'
 prefix: Floyd-Backpack
