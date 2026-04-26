@@ -73,6 +73,7 @@ public class BackpackEventListener implements Listener {
                 eventAction == InventoryAction.PLACE_SOME);
         boolean isSwitchAction = (eventAction == InventoryAction.SWAP_WITH_CURSOR);
         boolean isMoveAction = (eventAction == InventoryAction.MOVE_TO_OTHER_INVENTORY);
+        boolean isHotbarAction = (eventAction == InventoryAction.HOTBAR_SWAP);
         Player player = (Player) event.getWhoClicked();
         if ((isPlaceAction || isSwitchAction) && playerBackpackManager.isBackpackInventory(player, event.getClickedInventory())) {
             // 不允许将tool放入到背包中
@@ -82,6 +83,12 @@ public class BackpackEventListener implements Listener {
         } else if (isMoveAction && playerBackpackManager.isBackpackInventory(player, event.getInventory())) {
             // 不允许将tool放入到背包中
             if (OpenBackpackTool.matchItemStack(event.getCurrentItem())) {
+                event.setCancelled(true);
+            }
+        } else if (isHotbarAction && playerBackpackManager.isBackpackInventory(player, event.getClickedInventory())) {
+            // 不允许通过快捷键将tool放入到背包中
+            ItemStack item = player.getInventory().getItem(event.getHotbarButton());
+            if (OpenBackpackTool.matchItemStack(item)) {
                 event.setCancelled(true);
             }
         }
@@ -100,6 +107,11 @@ public class BackpackEventListener implements Listener {
     }
 
     private void givePlayerTools(Player player) {
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (OpenBackpackTool.matchItemStack(item)) {
+                return;
+            }
+        }
         ItemStack itemStack = OpenBackpackTool.getItemStack();
         player.getInventory().addItem(itemStack);
     }
