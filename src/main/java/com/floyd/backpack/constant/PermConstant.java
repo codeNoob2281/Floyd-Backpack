@@ -20,4 +20,9 @@ public class PermConstant {
      */
     public static final String CLEAR_BACKPACK = PREFIX + "clear";
 
+    /**
+     * 重载配置
+     */
+    public static final String RELOAD_CONFIG = PREFIX + "reload";
+
 }

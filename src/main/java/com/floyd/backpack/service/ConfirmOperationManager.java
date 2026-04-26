@@ -1,7 +1,7 @@
 package com.floyd.backpack.service;
 
 import com.floyd.backpack.FloydBackpackPlugin;
-import com.floyd.backpack.setting.CmdClearBackPackSettings;
+import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
 import com.floyd.backpack.constant.Constants;
 import com.floyd.backpack.enums.ConfirmOperationEnum;
 import com.floyd.core.logging.ConsoleLogger;
@@ -14,9 +14,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,12 +100,32 @@ public class ConfirmOperationManager implements InitializingBean, DisposableBean
         return confirmOpExpireInterval.getOrDefault(confirmOperation, Constants.DEFAULT_EXPIRE_INTERVAL);
     }
 
+    /**
+     * 重新加载配置
+     */
+    public void reload() {
+        cancelTasks();
+        scheduleTasks();
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
+        scheduleTasks();
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        cancelTasks();
+    }
+
+    /**
+     * 定时任务开启
+     */
+    private void scheduleTasks() {
         Long confirmInterval = settingsManager.getProperty(CmdClearBackPackSettings.CONFIRM_INTERVAL);
         confirmOpExpireInterval.put(ConfirmOperationEnum.CLEAR_BACKPACK, confirmInterval);
 
-        long period = Constants.SERVER_TICK_PER_SECOND * Constants.DEFAULT_EXPIRE_INTERVAL / 1000;
+        long tickPeriod = (long) (Constants.SERVER_TICK_PER_SECOND * confirmInterval / 1000d);
         expireKeyCheckTask = Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(FloydBackpackPlugin.instance(), () -> {
             AtomicInteger removedKeyCount = new AtomicInteger(0);
             lastConfirmOperationTimestampMap.forEach((confirmOperation, uuidOperationMap) -> {
@@ -128,11 +145,13 @@ public class ConfirmOperationManager implements InitializingBean, DisposableBean
             if (res > 0) {
                 logger.info(res + "个过期的二次确认信息被移除");
             }
-        }, period, period);
+        }, tickPeriod, tickPeriod);
     }
 
-    @Override
-    public void destroy() throws Exception {
+    /**
+     * 定时任务关闭
+     */
+    private void cancelTasks() {
         if (expireKeyCheckTask != null) {
             expireKeyCheckTask.cancel();
         }

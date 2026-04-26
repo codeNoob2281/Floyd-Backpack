@@ -1,7 +1,7 @@
 package com.floyd.backpack.service.impl;
 
 import com.floyd.backpack.FloydBackpackPlugin;
-import com.floyd.backpack.setting.CmdClearBackPackSettings;
+import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
 import com.floyd.backpack.constant.PermConstant;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.enums.ConfirmOperationEnum;
@@ -57,7 +57,6 @@ public class BackpackCmdServiceImpl implements BackpackCmdService {
         if (checkIsPlayer(sender)) {
             // 打开背包
             openBackpack(sender);
-            sender.sendMessage(Component.text("已为您打开背包", NamedTextColor.GREEN));
             return true;
         } else {
             sender.sendMessage(Component.text("无法通过控制台执行此命令", NamedTextColor.RED));

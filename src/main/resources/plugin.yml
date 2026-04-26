@@ -19,3 +19,6 @@ permissions:
   floydbackpack.clear:
     description: "允许玩家清空背包"
     default: op
+  floydbackpack.reload:
+    description: "重新加载配置"
+    default: op

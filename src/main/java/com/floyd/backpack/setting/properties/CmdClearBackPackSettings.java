@@ -1,11 +1,9 @@
-package com.floyd.backpack.setting;
+package com.floyd.backpack.setting.properties;
 
 import ch.jalu.configme.SettingsHolder;
 import ch.jalu.configme.properties.BooleanProperty;
 import ch.jalu.configme.properties.LongProperty;
-import ch.jalu.configme.properties.PropertyInitializer;
 import com.floyd.backpack.constant.Constants;
-import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
