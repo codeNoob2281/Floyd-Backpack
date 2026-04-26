@@ -1,9 +1,9 @@
 package com.floyd.backpack.service;
 
-import com.floyd.backpack.FloydBackpackPlugin;
-import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
+import com.floyd.backpack.BackpackPluginAccessor;
 import com.floyd.backpack.constant.Constants;
 import com.floyd.backpack.enums.ConfirmOperationEnum;
+import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
 import com.floyd.core.logging.ConsoleLogger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
 import com.floyd.core.settings.PluginSettingsManager;
@@ -52,7 +52,7 @@ public class ConfirmOperationManager implements InitializingBean, DisposableBean
      * @return 是否添加成功
      */
     public boolean addNew(@NotNull ConfirmOperationEnum confirmOperation, @NotNull String playerUuid) {
-        Map<String, Long> uuidOperationMap = lastConfirmOperationTimestampMap.computeIfAbsent(confirmOperation, k -> new ConcurrentHashMap<>(32));
+        Map<String, Long> uuidOperationMap = lastConfirmOperationTimestampMap.computeIfAbsent(confirmOperation, k -> new ConcurrentHashMap<>(PlayerBackpackManager.INITIAL_BACKPACK_MAP_CAPACITY));
         return uuidOperationMap.putIfAbsent(playerUuid, System.currentTimeMillis()) == null;
     }
 
@@ -126,7 +126,7 @@ public class ConfirmOperationManager implements InitializingBean, DisposableBean
         confirmOpExpireInterval.put(ConfirmOperationEnum.CLEAR_BACKPACK, confirmInterval);
 
         long tickPeriod = (long) (Constants.SERVER_TICK_PER_SECOND * confirmInterval / 1000d);
-        expireKeyCheckTask = Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(FloydBackpackPlugin.instance(), () -> {
+        expireKeyCheckTask = Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(BackpackPluginAccessor.getPlugin(), () -> {
             AtomicInteger removedKeyCount = new AtomicInteger(0);
             lastConfirmOperationTimestampMap.forEach((confirmOperation, uuidOperationMap) -> {
                 for (String existUuid : uuidOperationMap.keySet()) {

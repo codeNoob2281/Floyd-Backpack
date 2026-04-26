@@ -7,7 +7,7 @@ import com.floyd.backpack.constant.Constants;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import static ch.jalu.configme.properties.PropertyInitializer.*;
+import static ch.jalu.configme.properties.PropertyInitializer.newProperty;
 
 /**
  * 背包清除命令配置

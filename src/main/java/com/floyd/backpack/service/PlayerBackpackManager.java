@@ -1,6 +1,6 @@
 package com.floyd.backpack.service;
 
-import com.floyd.backpack.FloydBackpackPlugin;
+import com.floyd.backpack.BackpackPluginAccessor;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.core.inventory.io.BukkitItemStackSerializer;
 import com.floyd.core.inventory.io.ItemStackSerializer;
@@ -35,9 +35,11 @@ import java.util.concurrent.locks.Lock;
 @Component
 public class PlayerBackpackManager {
 
+    public static final int INITIAL_BACKPACK_MAP_CAPACITY = 32;
+
     private static final ConsoleLogger logger = ConsoleLoggerFactory.get(PlayerBackpackManager.class);
 
-    private final Map<String, Backpack> PLAYER_BACKPACK_MAP = new ConcurrentHashMap<>(32);
+    private final Map<String, Backpack> PLAYER_BACKPACK_MAP = new ConcurrentHashMap<>(INITIAL_BACKPACK_MAP_CAPACITY);
 
     private final ItemStackSerializer ITEM_STACK_SERIALIZER = new BukkitItemStackSerializer();
 
@@ -49,25 +51,28 @@ public class PlayerBackpackManager {
         logger.info("开始保存所有玩家的背包数据");
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger failCount = new AtomicInteger(0);
-        PLAYER_BACKPACK_MAP.forEach((uuid, backpack) -> {
-            Lock lock = backpack.getLock();
-            lock.lock();
-            try {
-                if (writeBackpackDataToFile(backpack)) {
-                    successCount.incrementAndGet();
-                } else {
-                    failCount.incrementAndGet();
+        for (String uuid : PLAYER_BACKPACK_MAP.keySet()) {
+            Backpack backpack = PLAYER_BACKPACK_MAP.get(uuid);
+            if (backpack != null) {
+                Lock lock = backpack.getLock();
+                lock.lock();
+                try {
+                    if (writeBackpackDataToFile(backpack)) {
+                        successCount.incrementAndGet();
+                    } else {
+                        failCount.incrementAndGet();
+                    }
+                } finally {
+                    lock.unlock();
                 }
-            } finally {
-                lock.unlock();
             }
-        });
+        }
         logger.info("保存所有玩家的背包数据完成，成功数：" + successCount.get() + "，失败数:" + failCount.get());
     }
 
     /**
      *
-     * 将玩家的背包数据保存到文件
+     * 将玩家的背包数据保存到文件，并从内存中移除
      *
      * @param player 玩家
      * @return 保存结果
@@ -160,8 +165,7 @@ public class PlayerBackpackManager {
     }
 
     private static File getBackpackDataFile(String uuid) {
-        FloydBackpackPlugin plugin = (FloydBackpackPlugin) FloydBackpackPlugin.instance();
-        return plugin.getBackpackDataPath().resolve(uuid + ".json").toFile();
+        return BackpackPluginAccessor.getBackpackDataPath().resolve(uuid + ".json").toFile();
     }
 
     private static String getUuid(Player player) {

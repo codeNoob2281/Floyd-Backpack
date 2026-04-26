@@ -1,6 +1,6 @@
 package com.floyd.backpack.command;
 
-import com.floyd.backpack.FloydBackpackPlugin;
+import com.floyd.backpack.BackpackPluginAccessor;
 import com.floyd.backpack.constant.PermConstant;
 import com.floyd.backpack.service.BackpackCmdService;
 import com.floyd.core.command.TrieCommandCompleter;
@@ -53,7 +53,7 @@ public class BackpackCmdExecutor implements CommandExecutor, TabCompleter {
             sender.sendMessage(Component.text("正在重新加载配置...", NamedTextColor.GREEN));
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
-            boolean isReloadSuccess = FloydBackpackPlugin.reload();
+            boolean isReloadSuccess = BackpackPluginAccessor.reload();
             stopWatch.stop();
             if (isReloadSuccess) {
                 sender.sendMessage(Component.text("重新加载配置完成，耗时" + stopWatch.getTotalTimeMillis() + "ms", NamedTextColor.GREEN));

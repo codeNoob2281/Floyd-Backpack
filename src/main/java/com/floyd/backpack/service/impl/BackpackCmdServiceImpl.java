@@ -1,14 +1,13 @@
 package com.floyd.backpack.service.impl;
 
-import com.floyd.backpack.FloydBackpackPlugin;
-import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
+import com.floyd.backpack.constant.Constants;
 import com.floyd.backpack.constant.PermConstant;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.enums.ConfirmOperationEnum;
 import com.floyd.backpack.service.BackpackCmdService;
 import com.floyd.backpack.service.ConfirmOperationManager;
 import com.floyd.backpack.service.PlayerBackpackManager;
-import com.floyd.core.FloydPlugin;
+import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
 import com.floyd.core.logging.ConsoleLogger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
 import com.floyd.core.permission.RequiredPermission;
@@ -72,7 +71,7 @@ public class BackpackCmdServiceImpl implements BackpackCmdService {
         if (!enable) {
             sender.sendMessage(Component.text("当前未启用清空背包功能", NamedTextColor.RED));
             if (!isPlayer) {
-                FloydBackpackPlugin.instance().getLogger().warning("请在插件目录的config.yml中修改command.backpack.clear.enable为true以开启背包清理功能");
+                logger.warn("请在插件目录的config.yml中修改command.backpack.clear.enable为true以开启背包清理功能");
             }
             return false;
         }
@@ -84,8 +83,8 @@ public class BackpackCmdServiceImpl implements BackpackCmdService {
         String uuid = player.getUniqueId().toString();
 
         Boolean needConfirm = pluginSettingsManager.getProperty(CmdClearBackPackSettings.NEED_CONFIRM);
-        // 无需二次确认，直接清空背包
         if (!needConfirm) {
+            // 无需二次确认，直接清空背包
             execClearBackpack(sender);
             return true;
         }
@@ -94,7 +93,7 @@ public class BackpackCmdServiceImpl implements BackpackCmdService {
             //  提示必须进行二次确认操作
             Long ttl = confirmOperationManager.getTtl(ConfirmOperationEnum.CLEAR_BACKPACK, uuid);
             if (ttl != null && ttl > 0) {
-                FloydBackpackPlugin.instance().getLogger().info(player.getName() + "仍存在活跃的二次确认操作，剩余时间" + ttl + "ms");
+                logger.info(player.getName() + "仍存在活跃的二次确认操作，剩余时间" + ttl + "ms");
                 sender.sendMessage(Component.text("当前仍存在一个待确认的操作，请继续执行", NamedTextColor.YELLOW));
                 sendClearConfirmTipMsg(sender);
             } else {
@@ -144,7 +143,7 @@ public class BackpackCmdServiceImpl implements BackpackCmdService {
 
     @Override
     public boolean onErrorCmd(@NonNull CommandSender sender) {
-        sender.sendMessage(Component.text("[" + FloydPlugin.instance().getPluginName() + "] 命令使用方法", NamedTextColor.AQUA));
+        sender.sendMessage(Component.text(Constants.MESSAGE_PREFIX + " 命令使用方法", NamedTextColor.AQUA));
         sender.sendMessage(Component.text("------------------------------------", NamedTextColor.GRAY));
         sender.sendMessage(Component.text("/bp open", NamedTextColor.GRAY)
                 .append(Component.text(" -> 打开背包", NamedTextColor.AQUA)));
