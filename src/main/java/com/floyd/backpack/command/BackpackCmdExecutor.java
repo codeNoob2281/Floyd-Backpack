@@ -1,6 +1,7 @@
 package com.floyd.backpack.command;
 
 import com.floyd.backpack.BackpackPluginAccessor;
+import com.floyd.backpack.FloydBackpackPlugin;
 import com.floyd.backpack.constant.PermConstant;
 import com.floyd.backpack.service.BackpackCmdService;
 import com.floyd.core.command.TrieCommandCompleter;
@@ -40,6 +41,7 @@ public class BackpackCmdExecutor implements CommandExecutor, TabCompleter {
         commandCompleter.addCommand("backpack clear confirm", PermConstant.CLEAR_BACKPACK);
         commandCompleter.addCommand("backpack clear cancel", PermConstant.CLEAR_BACKPACK);
         commandCompleter.addCommand("backpack reload", PermConstant.RELOAD_CONFIG);
+        commandCompleter.addCommand("backpack help", PermConstant.SHOW_HELP);
     }
 
     @Override
@@ -50,19 +52,11 @@ public class BackpackCmdExecutor implements CommandExecutor, TabCompleter {
         } else if ("clear".equals(args[0])) {
             return backpackCmdService.onClearBackpackCmd(sender, args);
         } else if ("reload".equals(args[0])) {
-            sender.sendMessage(Component.text("正在重新加载配置...", NamedTextColor.GREEN));
-            StopWatch stopWatch = new StopWatch();
-            stopWatch.start();
-            boolean isReloadSuccess = BackpackPluginAccessor.reload();
-            stopWatch.stop();
-            if (isReloadSuccess) {
-                sender.sendMessage(Component.text("重新加载配置完成，耗时" + stopWatch.getTotalTimeMillis() + "ms", NamedTextColor.GREEN));
-            } else {
-                sender.sendMessage(Component.text("重新加载配置失败，请前往控制台查看异常！", NamedTextColor.RED));
-            }
-            return true;
+            return backpackCmdService.onReloadCmd(sender, args);
+        } else if ("help".equals(args[0])) {
+            return backpackCmdService.onShowHelpCmd(sender, args);
         } else {
-            return backpackCmdService.onErrorCmd(sender);
+            return backpackCmdService.onErrorCmd(sender, args);
         }
     }
 

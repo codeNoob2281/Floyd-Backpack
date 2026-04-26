@@ -1,6 +1,7 @@
 package com.floyd.backpack.service;
 
 import com.floyd.backpack.BackpackPluginAccessor;
+import com.floyd.backpack.FloydBackpackPlugin;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.core.inventory.io.BukkitItemStackSerializer;
 import com.floyd.core.inventory.io.ItemStackSerializer;

@@ -1,13 +1,16 @@
 package com.floyd.backpack.service.impl;
 
+import com.floyd.backpack.BackpackPluginAccessor;
+import com.floyd.backpack.FloydBackpackPlugin;
 import com.floyd.backpack.constant.Constants;
+import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
 import com.floyd.backpack.constant.PermConstant;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.enums.ConfirmOperationEnum;
 import com.floyd.backpack.service.BackpackCmdService;
 import com.floyd.backpack.service.ConfirmOperationManager;
 import com.floyd.backpack.service.PlayerBackpackManager;
-import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
+import com.floyd.core.FloydPlugin;
 import com.floyd.core.logging.ConsoleLogger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
 import com.floyd.core.permission.RequiredPermission;
@@ -21,6 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
 import java.util.Arrays;
 import java.util.List;
@@ -124,6 +128,43 @@ public class BackpackCmdServiceImpl implements BackpackCmdService {
         }
     }
 
+    @Override
+    @RequiredPermission(value = PermConstant.RELOAD_CONFIG, tipPermValue = true)
+    public boolean onReloadCmd(@NonNull CommandSender sender, @NonNull @NotNull String @NonNull [] args) {
+        sender.sendMessage(Component.text("正在重新加载配置...", NamedTextColor.GREEN));
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        boolean isReloadSuccess = BackpackPluginAccessor.reload();
+        stopWatch.stop();
+        if (isReloadSuccess) {
+            sender.sendMessage(Component.text("重新加载配置完成，耗时" + stopWatch.getTotalTimeMillis() + "ms", NamedTextColor.GREEN));
+        } else {
+            sender.sendMessage(Component.text("重新加载配置失败，请前往控制台查看异常！", NamedTextColor.RED));
+        }
+        return true;
+    }
+
+    @Override
+    @RequiredPermission(value = PermConstant.SHOW_HELP, tipPermValue = true)
+    public boolean onShowHelpCmd(@NonNull CommandSender sender, @NonNull @NotNull String @NonNull [] args) {
+        sender.sendMessage(Component.text(Constants.MESSAGE_PREFIX + " 帮助菜单", NamedTextColor.AQUA));
+        sender.sendMessage(Component.text("------------------------------------", NamedTextColor.GRAY));
+        sender.sendMessage(Component.text("/bp open", NamedTextColor.GRAY)
+                .append(Component.text(" -> 打开背包", NamedTextColor.AQUA)));
+        sender.sendMessage(Component.text("/bp clear", NamedTextColor.GRAY)
+                .append(Component.text(" -> 清空背包", NamedTextColor.AQUA)));
+        sender.sendMessage(Component.text("/bp reload", NamedTextColor.GRAY)
+                .append(Component.text(" -> 重载背包", NamedTextColor.AQUA)));
+        sender.sendMessage(Component.text("------------------------------------", NamedTextColor.GRAY));
+        return true;
+    }
+
+    @Override
+    public boolean onErrorCmd(@NonNull CommandSender sender, @NotNull String @NonNull [] args) {
+        onShowHelpCmd(sender, args);
+        return false;
+    }
+
     private void execClearBackpack(@NonNull CommandSender sender) {
         int clearItemSize = clearBackpack(sender);
         sender.sendMessage(Component.text("已清空背包，共移除", NamedTextColor.GREEN)
@@ -139,18 +180,6 @@ public class BackpackCmdServiceImpl implements BackpackCmdService {
         sender.sendMessage(Component.text("输入 ", NamedTextColor.GOLD)
                 .append(Component.text("/bp clear cancel", NamedTextColor.RED))
                 .append(Component.text(" 取消", NamedTextColor.GOLD)));
-    }
-
-    @Override
-    public boolean onErrorCmd(@NonNull CommandSender sender) {
-        sender.sendMessage(Component.text(Constants.MESSAGE_PREFIX + " 命令使用方法", NamedTextColor.AQUA));
-        sender.sendMessage(Component.text("------------------------------------", NamedTextColor.GRAY));
-        sender.sendMessage(Component.text("/bp open", NamedTextColor.GRAY)
-                .append(Component.text(" -> 打开背包", NamedTextColor.AQUA)));
-        sender.sendMessage(Component.text("/bp clear", NamedTextColor.GRAY)
-                .append(Component.text(" -> 清空背包", NamedTextColor.AQUA)));
-        sender.sendMessage(Component.text("------------------------------------", NamedTextColor.GRAY));
-        return false;
     }
 
     private boolean checkIsPlayer(CommandSender sender) {
