@@ -91,6 +91,14 @@ public class PlayerBackpackManager {
         }
     }
 
+    public boolean isBackpackInventory(Player player, Inventory clickedInventory) {
+        if (player == null || clickedInventory == null) {
+            return false;
+        }
+        Backpack backpack = PLAYER_BACKPACK_MAP.get(getUuid(player));
+        return backpack != null && backpack.getInventory() == clickedInventory;
+    }
+
     private boolean writeBackpackDataToFile(Backpack backpack) {
         if (backpack == null) {
             return false;

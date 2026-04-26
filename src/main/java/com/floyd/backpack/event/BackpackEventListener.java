@@ -8,6 +8,10 @@ import com.floyd.core.logging.ConsoleLoggerFactory;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -59,6 +63,39 @@ public class BackpackEventListener implements Listener {
         if (OpenBackpackTool.matchEvent(event)) {
             backpackCmdService.onOpenBackpackCmd(event.getPlayer());
             event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        InventoryAction eventAction = event.getAction();
+        boolean isPlaceAction = (eventAction == InventoryAction.PLACE_ALL || eventAction == InventoryAction.PLACE_ONE ||
+                eventAction == InventoryAction.PLACE_SOME);
+        boolean isSwitchAction = (eventAction == InventoryAction.SWAP_WITH_CURSOR);
+        boolean isMoveAction = (eventAction == InventoryAction.MOVE_TO_OTHER_INVENTORY);
+        Player player = (Player) event.getWhoClicked();
+        if ((isPlaceAction || isSwitchAction) && playerBackpackManager.isBackpackInventory(player, event.getClickedInventory())) {
+            // 不允许将tool放入到背包中
+            if (OpenBackpackTool.matchItemStack(event.getCursor())) {
+                event.setCancelled(true);
+            }
+        } else if (isMoveAction && playerBackpackManager.isBackpackInventory(player, event.getInventory())) {
+            // 不允许将tool放入到背包中
+            if (OpenBackpackTool.matchItemStack(event.getCurrentItem())) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (playerBackpackManager.isBackpackInventory((Player) event.getWhoClicked(), event.getInventory())) {
+            // 不允许将tool放入到背包中
+            boolean matchTools = event.getNewItems().values().stream()
+                    .anyMatch(OpenBackpackTool::matchItemStack);
+            if (matchTools) {
+                event.setCancelled(true);
+            }
         }
     }
 

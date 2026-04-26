@@ -40,7 +40,11 @@ public class OpenBackpackTool extends AbstractTool {
             return false;
         }
         ItemStack itemStackInHand = event.getItem();
-        return itemStackInHand != null && ITEM_STACK_TEMPLATE.isSimilar(itemStackInHand);
+        return matchItemStack(itemStackInHand);
+    }
+
+    public static boolean matchItemStack(ItemStack itemStack) {
+        return itemStack != null && ITEM_STACK_TEMPLATE.isSimilar(itemStack);
     }
 
     private static ItemStack initItemStack() {
