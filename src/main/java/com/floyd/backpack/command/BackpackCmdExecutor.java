@@ -1,32 +1,22 @@
 package com.floyd.backpack.command;
 
-import com.floyd.backpack.constant.Constants;
+import com.floyd.backpack.BackpackPluginAccessor;
+import com.floyd.backpack.FloydBackpackPlugin;
 import com.floyd.backpack.constant.PermConstant;
-import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.service.BackpackCmdService;
-import com.floyd.backpack.service.PlayerBackpackManager;
-import com.floyd.core.FloydPlugin;
-import com.floyd.core.command.CommandCompleter;
 import com.floyd.core.command.TrieCommandCompleter;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
-import org.springframework.aop.framework.AopContext;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StopWatch;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author floyd
@@ -50,6 +40,8 @@ public class BackpackCmdExecutor implements CommandExecutor, TabCompleter {
         commandCompleter.addCommand("backpack clear", PermConstant.CLEAR_BACKPACK);
         commandCompleter.addCommand("backpack clear confirm", PermConstant.CLEAR_BACKPACK);
         commandCompleter.addCommand("backpack clear cancel", PermConstant.CLEAR_BACKPACK);
+        commandCompleter.addCommand("backpack reload", PermConstant.RELOAD_CONFIG);
+        commandCompleter.addCommand("backpack help", PermConstant.SHOW_HELP);
     }
 
     @Override
@@ -59,8 +51,12 @@ public class BackpackCmdExecutor implements CommandExecutor, TabCompleter {
             return backpackCmdService.onOpenBackpackCmd(sender);
         } else if ("clear".equals(args[0])) {
             return backpackCmdService.onClearBackpackCmd(sender, args);
+        } else if ("reload".equals(args[0])) {
+            return backpackCmdService.onReloadCmd(sender, args);
+        } else if ("help".equals(args[0])) {
+            return backpackCmdService.onShowHelpCmd(sender, args);
         } else {
-            return backpackCmdService.onErrorCmd(sender);
+            return backpackCmdService.onErrorCmd(sender, args);
         }
     }
 

@@ -1,5 +1,5 @@
 name: FloydBackpack
-version: '1.0.1'
+version: '1.0.2'
 main: com.floyd.backpack.FloydBackpackPlugin
 api-version: '1.21'
 prefix: Floyd-Backpack
@@ -19,3 +19,9 @@ permissions:
   floydbackpack.clear:
     description: "允许玩家清空背包"
     default: op
+  floydbackpack.reload:
+    description: "重新加载配置"
+    default: op
+  floydbackpack.help:
+    description: "显示帮助信息"
+    default: true

@@ -28,10 +28,28 @@ public interface BackpackCmdService {
     boolean onClearBackpackCmd(@NonNull CommandSender sender, @NotNull String @NonNull [] args);
 
     /**
+     * 重载配置
+     *
+     * @param sender
+     * @param args
+     * @return
+     */
+    boolean onReloadCmd(@NonNull CommandSender sender, @NotNull String @NonNull [] args);
+
+    /**
+     * 发送help消息
+     *
+     * @param sender
+     * @param args
+     * @return
+     */
+    boolean onShowHelpCmd(@NonNull CommandSender sender, @NotNull String @NonNull [] args);
+
+    /**
      * 错误命令处理
      *
      * @param sender
      * @return
      */
-    boolean onErrorCmd(@NonNull CommandSender sender);
+    boolean onErrorCmd(@NonNull CommandSender sender, @NotNull String @NonNull [] args);
 }

@@ -1,9 +1,13 @@
 package com.floyd.backpack.service;
 
+import com.floyd.backpack.BackpackPluginAccessor;
 import com.floyd.backpack.FloydBackpackPlugin;
-import com.floyd.backpack.config.CmdClearBackPackConfig;
+import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
 import com.floyd.backpack.constant.Constants;
 import com.floyd.backpack.enums.ConfirmOperationEnum;
+import com.floyd.core.logging.ConsoleLogger;
+import com.floyd.core.logging.ConsoleLoggerFactory;
+import com.floyd.core.settings.PluginSettingsManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -11,12 +15,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.scheduling.config.Task;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 import java.util.UUID;
@@ -28,7 +29,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2026/3/29
  */
 @org.springframework.stereotype.Component
-public class ConfirmOperationManager implements BeanFactoryAware, InitializingBean, DisposableBean {
+public class ConfirmOperationManager implements InitializingBean, DisposableBean {
+
+    private static final ConsoleLogger logger = ConsoleLoggerFactory.get(ConfirmOperationManager.class);
 
     private final Map<ConfirmOperationEnum, Map<String, Long>> lastConfirmOperationTimestampMap = new ConcurrentHashMap<>(8);
 
@@ -39,6 +42,9 @@ public class ConfirmOperationManager implements BeanFactoryAware, InitializingBe
      */
     private BukkitTask expireKeyCheckTask;
 
+    @Autowired
+    private PluginSettingsManager settingsManager;
+
     /**
      * 添加新的二次确认操作
      *
@@ -47,7 +53,7 @@ public class ConfirmOperationManager implements BeanFactoryAware, InitializingBe
      * @return 是否添加成功
      */
     public boolean addNew(@NotNull ConfirmOperationEnum confirmOperation, @NotNull String playerUuid) {
-        Map<String, Long> uuidOperationMap = lastConfirmOperationTimestampMap.computeIfAbsent(confirmOperation, k -> new ConcurrentHashMap<>(32));
+        Map<String, Long> uuidOperationMap = lastConfirmOperationTimestampMap.computeIfAbsent(confirmOperation, k -> new ConcurrentHashMap<>(PlayerBackpackManager.INITIAL_BACKPACK_MAP_CAPACITY));
         return uuidOperationMap.putIfAbsent(playerUuid, System.currentTimeMillis()) == null;
     }
 
@@ -95,16 +101,33 @@ public class ConfirmOperationManager implements BeanFactoryAware, InitializingBe
         return confirmOpExpireInterval.getOrDefault(confirmOperation, Constants.DEFAULT_EXPIRE_INTERVAL);
     }
 
-    @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        CmdClearBackPackConfig config = beanFactory.getBean(CmdClearBackPackConfig.class);
-        confirmOpExpireInterval.put(ConfirmOperationEnum.CLEAR_BACKPACK, config.getConfirmInterval());
+    /**
+     * 重新加载配置
+     */
+    public void reload() {
+        cancelTasks();
+        scheduleTasks();
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        long period = Constants.SERVER_TICK_PER_SECOND * Constants.DEFAULT_EXPIRE_INTERVAL / 1000;
-        expireKeyCheckTask = Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(FloydBackpackPlugin.instance(), () -> {
+        scheduleTasks();
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        cancelTasks();
+    }
+
+    /**
+     * 定时任务开启
+     */
+    private void scheduleTasks() {
+        Long confirmInterval = settingsManager.getProperty(CmdClearBackPackSettings.CONFIRM_INTERVAL);
+        confirmOpExpireInterval.put(ConfirmOperationEnum.CLEAR_BACKPACK, confirmInterval);
+
+        long tickPeriod = (long) (Constants.SERVER_TICK_PER_SECOND * confirmInterval / 1000d);
+        expireKeyCheckTask = Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(BackpackPluginAccessor.getPlugin(), () -> {
             AtomicInteger removedKeyCount = new AtomicInteger(0);
             lastConfirmOperationTimestampMap.forEach((confirmOperation, uuidOperationMap) -> {
                 for (String existUuid : uuidOperationMap.keySet()) {
@@ -121,13 +144,15 @@ public class ConfirmOperationManager implements BeanFactoryAware, InitializingBe
             });
             int res = removedKeyCount.get();
             if (res > 0) {
-                FloydBackpackPlugin.logger().info(res + "个过期的二次确认信息被移除");
+                logger.info(res + "个过期的二次确认信息被移除");
             }
-        }, period, period);
+        }, tickPeriod, tickPeriod);
     }
 
-    @Override
-    public void destroy() throws Exception {
+    /**
+     * 定时任务关闭
+     */
+    private void cancelTasks() {
         if (expireKeyCheckTask != null) {
             expireKeyCheckTask.cancel();
         }
