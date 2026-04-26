@@ -1,7 +1,5 @@
 package com.floyd.backpack.constant;
 
-import org.checkerframework.checker.units.qual.Prefix;
-
 /**
  * @author floyd
  * @date 2026/3/29

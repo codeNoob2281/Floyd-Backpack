@@ -1,32 +1,17 @@
 package com.floyd.backpack.command;
 
-import com.floyd.backpack.constant.Constants;
 import com.floyd.backpack.constant.PermConstant;
-import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.service.BackpackCmdService;
-import com.floyd.backpack.service.PlayerBackpackManager;
-import com.floyd.core.FloydPlugin;
-import com.floyd.core.command.CommandCompleter;
 import com.floyd.core.command.TrieCommandCompleter;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
-import org.springframework.aop.framework.AopContext;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author floyd

@@ -2,7 +2,6 @@ package com.floyd.backpack;
 
 import com.floyd.backpack.command.BackpackCmdExecutor;
 import com.floyd.backpack.event.BackpackEventListener;
-import com.floyd.backpack.injection.CommandRegistry;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.core.FloydPlugin;
 import com.floyd.core.PluginBizException;
@@ -13,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -85,4 +83,10 @@ public class FloydBackpackPlugin extends FloydPlugin {
                 "|_|     |_|\\___/ \\__  |\\____|  |______/ \\_||_|\\____)_| \\_) ||_/ \\_||_|\\____)_| \\_)\n" +
                 "                (____/                                   |_|                      ";
     }
+
+    @Configuration
+    @ComponentScan(basePackages = {"com.floyd.backpack", "com.floyd.core"})
+    public static class SpringApplication {
+    }
+
 }

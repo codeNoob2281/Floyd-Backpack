@@ -1,12 +1,12 @@
 package com.floyd.backpack.service;
 
 import com.floyd.backpack.FloydBackpackPlugin;
-import com.floyd.backpack.config.CmdClearBackPackConfig;
+import com.floyd.backpack.setting.CmdClearBackPackSettings;
 import com.floyd.backpack.constant.Constants;
 import com.floyd.backpack.enums.ConfirmOperationEnum;
-import com.floyd.backpack.event.BackpackEventListener;
 import com.floyd.core.logging.ConsoleLogger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
+import com.floyd.core.settings.PluginSettingsManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -19,7 +19,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.scheduling.config.Task;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 import java.util.UUID;
@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2026/3/29
  */
 @org.springframework.stereotype.Component
-public class ConfirmOperationManager implements BeanFactoryAware, InitializingBean, DisposableBean {
+public class ConfirmOperationManager implements InitializingBean, DisposableBean {
 
     private static final ConsoleLogger logger = ConsoleLoggerFactory.get(ConfirmOperationManager.class);
 
@@ -43,6 +43,9 @@ public class ConfirmOperationManager implements BeanFactoryAware, InitializingBe
      * 淘汰过期key的定时任务
      */
     private BukkitTask expireKeyCheckTask;
+
+    @Autowired
+    private PluginSettingsManager settingsManager;
 
     /**
      * 添加新的二次确认操作
@@ -101,13 +104,10 @@ public class ConfirmOperationManager implements BeanFactoryAware, InitializingBe
     }
 
     @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        CmdClearBackPackConfig config = beanFactory.getBean(CmdClearBackPackConfig.class);
-        confirmOpExpireInterval.put(ConfirmOperationEnum.CLEAR_BACKPACK, config.getConfirmInterval());
-    }
-
-    @Override
     public void afterPropertiesSet() throws Exception {
+        Long confirmInterval = settingsManager.getProperty(CmdClearBackPackSettings.CONFIRM_INTERVAL);
+        confirmOpExpireInterval.put(ConfirmOperationEnum.CLEAR_BACKPACK, confirmInterval);
+
         long period = Constants.SERVER_TICK_PER_SECOND * Constants.DEFAULT_EXPIRE_INTERVAL / 1000;
         expireKeyCheckTask = Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(FloydBackpackPlugin.instance(), () -> {
             AtomicInteger removedKeyCount = new AtomicInteger(0);

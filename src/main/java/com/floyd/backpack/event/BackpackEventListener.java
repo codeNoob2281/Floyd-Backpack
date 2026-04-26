@@ -1,7 +1,5 @@
 package com.floyd.backpack.event;
 
-import com.floyd.backpack.FloydBackpackPlugin;
-import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.service.BackpackCmdService;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.tools.OpenBackpackTool;

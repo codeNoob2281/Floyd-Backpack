@@ -1,7 +1,7 @@
 package com.floyd.backpack.service.impl;
 
 import com.floyd.backpack.FloydBackpackPlugin;
-import com.floyd.backpack.config.CmdClearBackPackConfig;
+import com.floyd.backpack.setting.CmdClearBackPackSettings;
 import com.floyd.backpack.constant.PermConstant;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.enums.ConfirmOperationEnum;
@@ -12,6 +12,7 @@ import com.floyd.core.FloydPlugin;
 import com.floyd.core.logging.ConsoleLogger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
 import com.floyd.core.permission.RequiredPermission;
+import com.floyd.core.settings.PluginSettingsManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
@@ -32,20 +33,20 @@ import java.util.Objects;
  */
 @Service
 public class BackpackCmdServiceImpl implements BackpackCmdService {
-    
+
     ConsoleLogger logger = ConsoleLoggerFactory.get(BackpackCmdServiceImpl.class);
 
     private final ConfirmOperationManager confirmOperationManager;
 
-    private final CmdClearBackPackConfig cmdClearBackPackConfig;
+    private final PluginSettingsManager pluginSettingsManager;
 
     private final PlayerBackpackManager playerBackpackManager;
 
     public BackpackCmdServiceImpl(ConfirmOperationManager confirmOperationManager,
-                                  CmdClearBackPackConfig cmdClearBackPackConfig,
+                                  PluginSettingsManager pluginSettingsManager,
                                   PlayerBackpackManager playerBackpackManager) {
         this.confirmOperationManager = confirmOperationManager;
-        this.cmdClearBackPackConfig = cmdClearBackPackConfig;
+        this.pluginSettingsManager = pluginSettingsManager;
         this.playerBackpackManager = playerBackpackManager;
     }
 
@@ -68,7 +69,8 @@ public class BackpackCmdServiceImpl implements BackpackCmdService {
     @RequiredPermission(value = PermConstant.CLEAR_BACKPACK, tipPermValue = true)
     public boolean onClearBackpackCmd(@NonNull CommandSender sender, @NotNull String @NonNull [] args) {
         boolean isPlayer = checkIsPlayer(sender);
-        if (!cmdClearBackPackConfig.isEnable()) {
+        Boolean enable = pluginSettingsManager.getProperty(CmdClearBackPackSettings.ENABLE);
+        if (!enable) {
             sender.sendMessage(Component.text("当前未启用清空背包功能", NamedTextColor.RED));
             if (!isPlayer) {
                 FloydBackpackPlugin.instance().getLogger().warning("请在插件目录的config.yml中修改command.backpack.clear.enable为true以开启背包清理功能");
@@ -82,8 +84,9 @@ public class BackpackCmdServiceImpl implements BackpackCmdService {
         Player player = (Player) sender;
         String uuid = player.getUniqueId().toString();
 
+        Boolean needConfirm = pluginSettingsManager.getProperty(CmdClearBackPackSettings.NEED_CONFIRM);
         // 无需二次确认，直接清空背包
-        if (!cmdClearBackPackConfig.isNeedConfirm()) {
+        if (!needConfirm) {
             execClearBackpack(sender);
             return true;
         }
@@ -99,7 +102,8 @@ public class BackpackCmdServiceImpl implements BackpackCmdService {
                 confirmOperationManager.addNew(ConfirmOperationEnum.CLEAR_BACKPACK, uuid);
                 sender.sendMessage(Component.text("是否确认删除背包？请注意这是一个不可逆的操作", NamedTextColor.GOLD));
                 sendClearConfirmTipMsg(sender);
-                long seconds = Math.round((double) cmdClearBackPackConfig.getConfirmInterval() / 1000L);
+                Long confirmInterval = pluginSettingsManager.getProperty(CmdClearBackPackSettings.CONFIRM_INTERVAL);
+                long seconds = Math.round((double) confirmInterval / 1000L);
                 sender.sendMessage(Component.text("你有" + seconds + "s的时间处理该操作", NamedTextColor.BLUE));
             }
             return true;
