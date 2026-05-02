@@ -1,10 +1,9 @@
 package com.floyd.backpack.service;
 
 import com.floyd.backpack.BackpackPluginAccessor;
-import com.floyd.backpack.FloydBackpackPlugin;
-import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
 import com.floyd.backpack.constant.Constants;
 import com.floyd.backpack.enums.ConfirmOperationEnum;
+import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
 import com.floyd.core.logging.ConsoleLogger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
 import com.floyd.core.settings.PluginSettingsManager;

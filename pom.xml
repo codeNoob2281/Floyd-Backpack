@@ -14,6 +14,9 @@
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <dependencies.floyd-core.version>1.0.4-SNAPSHOT</dependencies.floyd-core.version>
+        <dependencies.lombok.version>1.18.30</dependencies.lombok.version>
+        <dependencies.paper-api.version>1.21.11-R0.1-SNAPSHOT</dependencies.paper-api.version>
     </properties>
 
     <build>
@@ -66,19 +69,19 @@
         <dependency>
             <groupId>com.floyd.mc</groupId>
             <artifactId>floyd-core</artifactId>
-            <version>1.0.3-HOTFIX</version>
+            <version>${dependencies.floyd-core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>${dependencies.lombok.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21.11-R0.1-SNAPSHOT</version>
+            <version>${dependencies.paper-api.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

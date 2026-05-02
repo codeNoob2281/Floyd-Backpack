@@ -1,18 +1,17 @@
 package com.floyd.backpack.event;
 
-import com.floyd.backpack.service.BackpackCmdService;
+import com.floyd.backpack.command.BackpackSubCmdHandler;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.tools.OpenBackpackTool;
 import com.floyd.core.logging.ConsoleLogger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
-import com.floyd.core.logging.LogLevel;
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -29,12 +28,12 @@ public class BackpackEventListener implements Listener {
 
     private final PlayerBackpackManager playerBackpackManager;
 
-    private final BackpackCmdService backpackCmdService;
+    private final BackpackSubCmdHandler backpackSubCmdHandler;
 
     public BackpackEventListener(PlayerBackpackManager playerBackpackManager,
-                                 BackpackCmdService backpackCmdService) {
+                                 BackpackSubCmdHandler backpackSubCmdHandler) {
         this.playerBackpackManager = playerBackpackManager;
-        this.backpackCmdService = backpackCmdService;
+        this.backpackSubCmdHandler = backpackSubCmdHandler;
     }
 
     @EventHandler
@@ -62,7 +61,11 @@ public class BackpackEventListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (OpenBackpackTool.matchEvent(event)) {
-            backpackCmdService.onOpenBackpackCmd(event.getPlayer());
+            Player player = event.getPlayer();
+            backpackSubCmdHandler.onOpenBackpackCmd(player);
+            player.playSound(Sound.sound()
+                    .type(org.bukkit.Sound.BLOCK_CHEST_OPEN)
+                    .build());
             event.setCancelled(true);
         }
     }

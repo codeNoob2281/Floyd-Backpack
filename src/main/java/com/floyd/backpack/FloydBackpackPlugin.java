@@ -1,6 +1,5 @@
 package com.floyd.backpack;
 
-import com.floyd.backpack.command.BackpackCmdExecutor;
 import com.floyd.backpack.event.BackpackEventListener;
 import com.floyd.backpack.service.ConfirmOperationManager;
 import com.floyd.backpack.service.PlayerBackpackManager;
@@ -16,8 +15,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,8 +39,8 @@ public class FloydBackpackPlugin extends FloydPlugin {
     @Override
     protected void initialize() {
         // 绑定指令
-        Bukkit.getPluginCommand("backpack")
-                .setExecutor(getApplicationContext().getBean(BackpackCmdExecutor.class));
+        //Bukkit.getPluginCommand("backpack")
+        //        .setExecutor(getApplicationContext().getBean(BackpackCmdExecutor.class));
         // 注册事件监听器
         registerEventListener();
         // 初始化目录
