@@ -7,7 +7,7 @@ import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.core.command.SubCommandHandler;
 import com.floyd.core.command.SubCommandMapping;
-import com.floyd.core.logging.ConsoleLogger;
+import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -24,7 +24,7 @@ import org.springframework.util.StopWatch;
 @SubCommandHandler(rootCommand = "backpack")
 public class BackpackSubCmdHandler extends AbstractCmdHandler {
 
-    private static final ConsoleLogger logger = ConsoleLoggerFactory.get(BackpackSubCmdHandler.class);
+    private static final Logger logger = ConsoleLoggerFactory.get(BackpackSubCmdHandler.class);
 
     protected BackpackSubCmdHandler(PlayerBackpackManager playerBackpackManager) {
         super(playerBackpackManager);

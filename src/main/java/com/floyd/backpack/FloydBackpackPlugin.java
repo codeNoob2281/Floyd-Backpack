@@ -6,7 +6,7 @@ import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.setting.SettingsReloadManager;
 import com.floyd.core.FloydPlugin;
 import com.floyd.core.PluginBizException;
-import com.floyd.core.logging.ConsoleLogger;
+import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
 import com.floyd.core.settings.PluginSettingsManager;
 import org.bukkit.Bukkit;
@@ -29,7 +29,7 @@ import java.util.List;
 
 public class FloydBackpackPlugin extends FloydPlugin {
 
-    private static final ConsoleLogger logger = ConsoleLoggerFactory.get(FloydBackpackPlugin.class);
+    private static final Logger logger = ConsoleLoggerFactory.get(FloydBackpackPlugin.class);
 
     @Override
     public String getPluginName() {

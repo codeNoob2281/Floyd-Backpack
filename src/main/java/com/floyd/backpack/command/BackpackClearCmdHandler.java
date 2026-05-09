@@ -8,7 +8,7 @@ import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
 import com.floyd.core.command.SubCommandHandler;
 import com.floyd.core.command.SubCommandMapping;
-import com.floyd.core.logging.ConsoleLogger;
+import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
 import com.floyd.core.settings.PluginSettingsManager;
 import net.kyori.adventure.text.Component;
@@ -30,7 +30,7 @@ import java.util.Objects;
 @SubCommandHandler(rootCommand = "backpack")
 public class BackpackClearCmdHandler extends AbstractCmdHandler {
 
-    private static final ConsoleLogger logger = ConsoleLoggerFactory.get(BackpackClearCmdHandler.class);
+    private static final Logger logger = ConsoleLoggerFactory.get(BackpackClearCmdHandler.class);
 
     private final ConfirmOperationManager confirmOperationManager;
 
@@ -70,7 +70,7 @@ public class BackpackClearCmdHandler extends AbstractCmdHandler {
 
         Long ttl = confirmOperationManager.getTtl(ConfirmOperationEnum.CLEAR_BACKPACK, uuid);
         if (ttl != null && ttl > 0) {
-            logger.info(player.getName() + "仍存在活跃的二次确认操作，剩余时间" + ttl + "ms");
+            logger.info("{}仍存在活跃的二次确认操作，剩余时间{}ms", player.getName(), ttl);
             sender.sendMessage(Component.text("当前仍存在一个待确认的操作，请继续执行", NamedTextColor.YELLOW));
             sendClearConfirmTipMsg(sender);
         } else {
@@ -126,7 +126,7 @@ public class BackpackClearCmdHandler extends AbstractCmdHandler {
         sender.sendMessage(Component.text("已清空背包，共移除", NamedTextColor.GREEN)
                 .append(Component.text(clearItemSize, NamedTextColor.RED))
                 .append(Component.text("件物品", NamedTextColor.GREEN)));
-        logger.info("清空 [" + sender.getName() + "] 的背包，共移除 [" + clearItemSize + "] 件物品");
+        logger.info("清空 [{}] 的背包，共移除 [{}] 件物品", sender.getName(), clearItemSize);
     }
 
     private static void sendClearConfirmTipMsg(@NonNull CommandSender sender) {

@@ -4,7 +4,7 @@ import com.floyd.backpack.BackpackPluginAccessor;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.core.inventory.io.BukkitItemStackSerializer;
 import com.floyd.core.inventory.io.ItemStackSerializer;
-import com.floyd.core.logging.ConsoleLogger;
+import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
 import com.floyd.core.util.DateUtil;
 import com.floyd.core.util.FileUtil;
@@ -37,7 +37,7 @@ public class PlayerBackpackManager {
 
     public static final int INITIAL_BACKPACK_MAP_CAPACITY = 32;
 
-    private static final ConsoleLogger logger = ConsoleLoggerFactory.get(PlayerBackpackManager.class);
+    private static final Logger logger = ConsoleLoggerFactory.get(PlayerBackpackManager.class);
 
     private final Map<String, Backpack> PLAYER_BACKPACK_MAP = new ConcurrentHashMap<>(INITIAL_BACKPACK_MAP_CAPACITY);
 
@@ -67,7 +67,7 @@ public class PlayerBackpackManager {
                 }
             }
         }
-        logger.info("保存所有玩家的背包数据完成，成功数：" + successCount.get() + "，失败数:" + failCount.get());
+        logger.info("保存所有玩家的背包数据完成，成功数：{}，失败数：{}", successCount.get(), failCount.get());
     }
 
     /**
@@ -121,7 +121,7 @@ public class PlayerBackpackManager {
             FileUtil.writeString(dataFile, jsonObject.toString(), StandardCharsets.UTF_8);
             return true;
         } catch (IOException e) {
-            logger.error("保存玩家[" + backpack.getPlayerName() + "]的背包数据失败", e);
+            logger.error("保存玩家[{}]的背包数据失败", backpack.getPlayerName(), e);
             return false;
         }
     }
@@ -144,21 +144,21 @@ public class PlayerBackpackManager {
             } else {
                 boolean res = backpackDataFile.createNewFile();
                 if (!res) {
-                    logger.warn("创建玩家[" + player.getName() + "]的背包数据文件失败，请检查文件权限");
+                    logger.warn("创建玩家[{}]的背包数据文件失败，请检查文件权限", player.getName());
                 }
             }
         } catch (Exception e) {
-            logger.error("加载玩家[" + player.getName() + "]的背包数据失败", e);
+            logger.error("加载玩家[{}]的背包数据失败", player.getName(), e);
             if (e instanceof IOException) {
                 return backpack;
             }
             // 非io异常，备份损坏的文件
             File backupFile = new File(backpackDataFile.getAbsolutePath() + ".bak." + DateUtil.format(new Date(), DateUtil.PURE_DATE_TIME_FORMAT));
             try {
-                logger.warn("由于玩家[" + player.getName() + "]的背包已损坏，已为该玩家创建新背包，旧背包文件备份位置：" + backupFile.getAbsolutePath());
+                logger.warn("由于玩家[{}]的背包已损坏，已为该玩家创建新背包，旧背包文件备份位置：{}", player.getName(), backupFile.getAbsolutePath());
                 Files.copy(backpackDataFile.toPath(), backupFile.toPath());
             } catch (IOException ioe) {
-                logger.error("备份玩家[" + player.getName() + "]的背包数据失败", ioe);
+                logger.error("备份玩家[{}]的背包数据失败", player.getName(), ioe);
             }
         }
         return backpack;

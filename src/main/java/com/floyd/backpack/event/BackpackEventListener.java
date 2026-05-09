@@ -3,7 +3,7 @@ package com.floyd.backpack.event;
 import com.floyd.backpack.command.BackpackSubCmdHandler;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.tools.OpenBackpackTool;
-import com.floyd.core.logging.ConsoleLogger;
+import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.entity.Player;
@@ -24,7 +24,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class BackpackEventListener implements Listener {
 
-    private static final ConsoleLogger logger = ConsoleLoggerFactory.get(BackpackEventListener.class);
+    private static final Logger logger = ConsoleLoggerFactory.get(BackpackEventListener.class);
 
     private final PlayerBackpackManager playerBackpackManager;
 
@@ -44,12 +44,12 @@ public class BackpackEventListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        logger.info("检测到玩家退出，开始保存玩家[" + player.getName() + "]的背包数据");
+        logger.info("检测到玩家退出，开始保存玩家[{}]的背包数据", player.getName());
         boolean res = playerBackpackManager.flushBackpackToFile(player);
         if (res) {
-            logger.info("保存玩家[" + player.getName() + "]的背包数据完成");
+            logger.info("保存玩家[{}]的背包数据完成", player.getName());
         } else {
-            logger.warn("保存玩家[" + player.getName() + "]的背包数据失败");
+            logger.warn("保存玩家[{}]的背包数据失败", player.getName());
         }
     }
 
