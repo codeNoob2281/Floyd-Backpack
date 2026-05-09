@@ -1,0 +1,9 @@
+---
+blank_issues_enabled: false
+contact_links:
+  - name: Question | 问题
+    url: https://github.com/codeNoob2281/Floyd-Core/discussions
+    about: Ask questions and discuss | 提问和讨论
+  - name: Read Documentation | 阅读文档
+    url: https://github.com/codeNoob2281/Floyd-Core/wiki
+    about: Check the documentation for help | 查看文档获取帮助

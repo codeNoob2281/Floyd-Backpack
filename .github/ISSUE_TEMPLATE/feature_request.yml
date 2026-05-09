@@ -1,0 +1,55 @@
+---
+name: Feature Request | 功能请求
+description: Suggest an idea for this project | 为项目提出建议
+title: "[Feature] "
+labels: ["enhancement", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to suggest a feature!
+        感谢您花时间提出功能建议！
+
+  - type: checkboxes
+    id: existing-request
+    attributes:
+      label: Is there an existing feature request for this? | 是否已有相关功能请求？
+      description: Please search to see if a feature request already exists for what you want. | 请先搜索是否已有相关功能请求。
+      options:
+        - label: I have searched the existing feature requests | 我已搜索过现有功能请求
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem? | 您的功能请求是否与某个问题相关？
+      description: A clear and concise description of what the problem is. | 请清晰简洁地描述问题内容。
+      placeholder: I'm always frustrated when... | 我总是为...感到困扰...
+    validations:
+      required: false
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the Solution You'd Like | 描述您想要的解决方案
+      description: A clear and concise description of what you want to happen. | 请清晰简洁地描述您期望的结果。
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Describe Alternatives You've Considered | 描述您考虑过的替代方案
+      description: A clear and concise description of any alternative solutions or features you've considered. | 请清晰简洁地描述您考虑过的任何替代解决方案或功能。
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context | 其他上下文
+      description: Add any other context or screenshots about the feature request here. | 在这里添加关于功能请求的其他上下文或截图。
+    validations:
+      required: false

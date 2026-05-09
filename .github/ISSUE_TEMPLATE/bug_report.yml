@@ -1,0 +1,105 @@
+---
+name: Bug Report | 漏洞报告
+description: Report a bug or unexpected behavior | 报告漏洞或意外行为
+title: "[Bug] "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report this bug!
+        感谢您花时间报告这个漏洞！
+
+  - type: checkboxes
+    id: existing-issue
+    attributes:
+      label: Is there an existing issue for this? | 是否已有相关 issue？
+      description: Please search to see if an issue already exists for the bug you encountered. | 请先搜索是否已有相关 issue。
+      options:
+        - label: I have searched the existing issues | 我已搜索过现有 issue
+          required: true
+
+  - type: textarea
+    id: describe-the-bug
+    attributes:
+      label: Describe the Bug | 描述漏洞
+      description: A clear and concise description of what the bug is. | 请清晰简洁地描述漏洞内容。
+      placeholder: Tell us what happened... | 请告诉我们发生了什么...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior | 预期行为
+      description: What did you expect to happen? | 您预期应该发生什么？
+      placeholder: What should have happened... | 应该发生什么...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce | 复现步骤
+      description: Steps to reproduce the behavior. | 复现该行为的步骤。
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin Version | 插件版本
+      description: What version of Floyd-Core are you using? | 您使用的 Floyd-Core 版本是什么？
+      placeholder: e.g., 1.0.3
+    validations:
+      required: true
+
+  - type: input
+    id: server-version
+    attributes:
+      label: Server Version | 服务器版本
+      description: What server software and version are you using? | 您使用的服务器软件和版本是什么？
+      placeholder: e.g., Paper 1.21.1
+    validations:
+      required: true
+
+  - type: input
+    id: java-version
+    attributes:
+      label: Java Version | Java 版本
+      description: What Java version are you using? | 您使用的 Java 版本是什么？
+      placeholder: e.g., Java 21
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Log Output | 相关日志输出
+      description: Please copy and paste any relevant log output. | 请复制粘贴相关的日志输出。
+      render: plain text
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots / Videos | 截图 / 视频
+      description: If applicable, add screenshots or videos to help explain your problem. | 如果可以，请添加截图或视频来帮助说明您的问题。
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context | 其他上下文
+      description: Add any other context about the problem here. | 在这里添加关于问题的其他上下文。
+    validations:
+      required: false
