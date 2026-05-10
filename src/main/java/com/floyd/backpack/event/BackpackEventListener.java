@@ -44,12 +44,12 @@ public class BackpackEventListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        logger.info("检测到玩家退出，开始保存玩家[{}]的背包数据", player.getName());
+        logger.info("Player quit detected, saving backpack data for player [{}]", player.getName());
         boolean res = playerBackpackManager.flushBackpackToFile(player);
         if (res) {
-            logger.info("保存玩家[{}]的背包数据完成", player.getName());
+            logger.info("Backpack data saved for player [{}]", player.getName());
         } else {
-            logger.warn("保存玩家[{}]的背包数据失败", player.getName());
+            logger.warn("Failed to save backpack data for player [{}]", player.getName());
         }
     }
 

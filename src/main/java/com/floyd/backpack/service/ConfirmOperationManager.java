@@ -142,7 +142,7 @@ public class ConfirmOperationManager implements InitializingBean, DisposableBean
             });
             int res = removedKeyCount.get();
             if (res > 0) {
-                logger.info("{}个过期的二次确认信息被移除", res);
+                logger.info("{} expired confirmation operation(s) removed", res);
             }
         }, tickPeriod, tickPeriod);
     }

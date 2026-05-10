@@ -52,7 +52,7 @@ public class BackpackClearCmdHandler extends AbstractCmdHandler {
         if (!enable) {
             sender.sendMessage(CommandBackpackClearMsg.FEATURE_DISABLED.content());
             if (!isPlayer) {
-                logger.warn("请在插件目录的config.yml中修改command.backpack.clear.enable为true以开启背包清理功能");
+                logger.warn("Please set command.backpack.clear.enable to true in config.yml to enable the clear backpack feature");
             }
             return false;
         }
@@ -71,7 +71,7 @@ public class BackpackClearCmdHandler extends AbstractCmdHandler {
 
         Long ttl = confirmOperationManager.getTtl(ConfirmOperationEnum.CLEAR_BACKPACK, uuid);
         if (ttl != null && ttl > 0) {
-            logger.info("{}仍存在活跃的二次确认操作，剩余时间{}ms", player.getName(), ttl);
+            logger.info("Player {} still has an active confirmation operation, remaining time: {}ms", player.getName(), ttl);
             sender.sendMessage(CommandBackpackClearMsg.PENDING_OPERATION_EXISTS.content());
             sendClearConfirmTipMsg(sender);
         } else {
@@ -125,7 +125,7 @@ public class BackpackClearCmdHandler extends AbstractCmdHandler {
     private void execClearBackpack(@NonNull CommandSender sender) {
         int clearItemSize = clearBackpack(sender);
         sender.sendMessage(CommandBackpackClearMsg.CLEARED.content(clearItemSize));
-        logger.info("清空 [{}] 的背包，共移除 [{}] 件物品", sender.getName(), clearItemSize);
+        logger.info("Cleared backpack for [{}], removed [{}] items", sender.getName(), clearItemSize);
     }
 
     private static void sendClearConfirmTipMsg(@NonNull CommandSender sender) {
