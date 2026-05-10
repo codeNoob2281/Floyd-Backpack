@@ -1,0 +1,70 @@
+---
+name: Documentation Issue | 文档问题
+description: Report incorrect, missing, or confusing documentation | 报告不正确、缺失或令人困惑的文档
+title: "[Docs] "
+labels: ["documentation", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping us improve our documentation!
+        感谢您帮助我们改进文档！
+
+  - type: checkboxes
+    id: existing-issue
+    attributes:
+      label: Is there an existing issue for this? | 是否已有相关 issue？
+      description: Please search to see if an issue already exists for this documentation problem. | 请先搜索是否已有相关 issue。
+      options:
+        - label: I have searched the existing issues | 我已搜索过现有 issue
+          required: true
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Type of Documentation Issue | 文档问题类型
+      description: What kind of documentation issue is this? | 这是什么类型的文档问题？
+      options:
+        - "Incorrect Information | 信息错误"
+        - "Missing Documentation | 文档缺失"
+        - "Outdated Content | 内容过时"
+        - "Confusing or Unclear | 内容困惑或不清楚"
+        - "Typo or Grammar Error | 拼写或语法错误"
+        - "Other | 其他"
+    validations:
+      required: true
+
+  - type: input
+    id: doc-location
+    attributes:
+      label: Documentation Location | 文档位置
+      description: Where is this documentation located? (URL, file path, etc.) | 该文档位于何处？（URL、文件路径等）
+      placeholder: e.g., README.md, /docs/getting-started.md
+    validations:
+      required: true
+
+  - type: textarea
+    id: describe-issue
+    attributes:
+      label: Describe the Issue | 描述问题
+      description: A clear and concise description of what the issue is. | 请清晰简洁地描述问题内容。
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-fix
+    attributes:
+      label: Suggested Fix | 建议的修复
+      description: Do you have a suggestion for how to fix this? | 您对如何修复有建议吗？
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context | 其他上下文
+      description: Add any other context here. | 在这里添加其他上下文。
+    validations:
+      required: false
