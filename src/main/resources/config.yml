@@ -1,10 +1,20 @@
 logging:
   file:
-    enable: false  # 是否开启日志文件
+    # Enable logging to a file
+    enable: true
+  # Log level
   level: INFO
 command:
   backpack:
     clear:
-      enable: true # 是否启用清空背包操作
-      need-confirm: true # 是否需要二次确认
-      confirm-interval: 30000 # 确认间隔
+      enable: true
+      need-confirm: true
+      confirm-interval: 5000
+i18n:
+  # Locale to use for internationalization
+  locale: en
+  cache:
+    # Enable i18n message cache
+    enable: true
+    # Cache expire time in seconds
+    expire-time: 60

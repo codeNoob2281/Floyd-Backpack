@@ -1,5 +1,6 @@
 package com.floyd.backpack.setting.properties;
 
+import ch.jalu.configme.Comment;
 import ch.jalu.configme.SettingsHolder;
 import ch.jalu.configme.properties.BooleanProperty;
 import ch.jalu.configme.properties.LongProperty;
@@ -21,15 +22,18 @@ public class CmdClearBackPackSettings implements SettingsHolder {
     /**
      * 是否启用
      */
+    @Comment("是否启用背包清除命令")
     public static @NotNull BooleanProperty ENABLE = newProperty("command.backpack.clear.enable", true);
 
     /**
      * 是否需要二次确认
      */
+    @Comment("是否需要二次确认")
     public static @NotNull BooleanProperty NEED_CONFIRM = newProperty("command.backpack.clear.need-confirm", true);
 
     /**
      * 二次确认间隔时间，单位ms
      */
+    @Comment("二次确认间隔时间，单位ms")
     public static @NotNull LongProperty CONFIRM_INTERVAL = newProperty("command.backpack.clear.confirm-interval", Constants.DEFAULT_EXPIRE_INTERVAL);
 }

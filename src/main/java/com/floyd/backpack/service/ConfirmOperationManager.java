@@ -3,12 +3,12 @@ package com.floyd.backpack.service;
 import com.floyd.backpack.BackpackPluginAccessor;
 import com.floyd.backpack.constant.Constants;
 import com.floyd.backpack.enums.ConfirmOperationEnum;
+import com.floyd.backpack.message.CommandBackpackClearMsg;
 import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
 import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
 import com.floyd.core.settings.PluginSettingsManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -134,8 +134,7 @@ public class ConfirmOperationManager implements InitializingBean, DisposableBean
                     if (ttl != null && ttl == 0) {
                         Player player = Bukkit.getPlayer(UUID.fromString(existUuid));
                         if (player != null) {
-                            player.sendMessage(Component.text(Constants.MESSAGE_PREFIX, NamedTextColor.YELLOW)
-                                    .append(Component.text(" 上一个操作已过期", NamedTextColor.GOLD)));
+                            player.sendMessage(Component.text(CommandBackpackClearMsg.OPERATION_EXPIRED.content()));
                         }
                         removedKeyCount.incrementAndGet();
                     }
