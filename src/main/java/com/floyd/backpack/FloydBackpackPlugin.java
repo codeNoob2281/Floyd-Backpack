@@ -38,9 +38,6 @@ public class FloydBackpackPlugin extends FloydPlugin {
 
     @Override
     protected void initialize() {
-        // 绑定指令
-        //Bukkit.getPluginCommand("backpack")
-        //        .setExecutor(getApplicationContext().getBean(BackpackCmdExecutor.class));
         // 注册事件监听器
         registerEventListener();
         // 初始化目录

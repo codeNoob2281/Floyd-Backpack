@@ -61,12 +61,12 @@ public class BackpackEventListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (OpenBackpackTool.matchEvent(event)) {
+            event.setCancelled(true);
             Player player = event.getPlayer();
             backpackSubCmdHandler.onOpenBackpackCmd(player);
             player.playSound(Sound.sound()
                     .type(org.bukkit.Sound.BLOCK_CHEST_OPEN)
                     .build());
-            event.setCancelled(true);
         }
     }
 

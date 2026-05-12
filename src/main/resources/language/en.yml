@@ -1,25 +1,27 @@
 command:
   backpack:
-    console-not-allowed: '§cCannot execute this command from console.'
+    console-not-allowed: "§cCannot execute this command from console."
     reload:
-      start: '§aReloading config...'
-      success: '§aReload completed in {0}ms.'
-      failure: '§cReload failed, please check the console for errors!'
+      start: "§aReloading config..."
+      success: "§aReload completed in {0}ms."
+      failure: "§cReload failed, please check the console for errors!"
     help:
-      line1: '§b[Floyd-Backpack] §a§lHelp Info'
-      line2: '§6§n>> Commands'
-      line3: '§3/bp open §e- §7Open Backpack'
-      line4: '§3/bp clear §e- §7Clear Backpack'
-      line5: '§3/bp reload §e- §7Reload Config'
-      line6: '§eVisit §f§nhttps://github.com/codeNoob2281/Floyd-Backpack§e for more info.'
+      line1: "§b[Floyd-Backpack] §a§lHelp Info"
+      line2: "§6§n>> Commands"
+      line3: "§3/bp open §e- §7Open Backpack"
+      line4: "§3/bp clear §e- §7Clear Backpack"
+      line5: "§3/bp reload §e- §7Reload Config"
+      line6: "§eVisit §f§nhttps://github.com/codeNoob2281/Floyd-Backpack§e for more info."
     clear:
-      feature-disabled: '§cClear backpack feature is not enabled.'
-      pending-operation-exists: '§eA pending confirmation operation already exists, please proceed.'
-      confirm-delete: '§6Are you sure you want to clear your backpack? This operation is irreversible!'
-      confirm-timeout: '§9You have {0}s to confirm this operation.'
-      no-active-operation: '§eNo active confirmation operation.'
-      operation-cancelled: '§eClear backpack operation has been cancelled.'
-      cleared: '§aBackpack cleared, removed §c{0} §aitems.'
-      tip-confirm: '§6Type §c/bp clear confirm §6to confirm.'
-      tip-cancel: '§6Type §c/bp clear cancel §6to cancel.'
-      operation-expired: '§e[Floyd-Backpack] §6Previous operation has expired.'
+      feature-disabled: "§cClear backpack feature is not enabled."
+      pending-operation-exists: "§eA pending confirmation operation already exists, please proceed."
+      confirm-delete: "§6Are you sure you want to clear your backpack? This operation is irreversible!"
+      confirm-timeout: "§9You have {0}s to confirm this operation."
+      no-active-operation: "§eNo active confirmation operation."
+      operation-cancelled: "§eClear backpack operation has been cancelled."
+      cleared: "§aBackpack cleared, removed §c{0} §aitems."
+      tip-confirm: "§6Type §c/bp clear confirm §6to confirm."
+      tip-cancel: "§6Type §c/bp clear cancel §6to cancel."
+      operation-expired: "§e[Floyd-Backpack] §6Previous operation has expired."
+chest-ui:
+  backpack-title: "§6{0}''s backpack"
