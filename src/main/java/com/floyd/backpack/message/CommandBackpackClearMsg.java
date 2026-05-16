@@ -1,11 +1,14 @@
 package com.floyd.backpack.message;
 
+import com.floyd.core.i18n.I18nMessageHolder;
 import com.floyd.core.i18n.LocaleMessage;
+import org.springframework.stereotype.Component;
 
 /**
  * @author floyd
  */
-public class CommandBackpackClearMsg {
+@Component
+public class CommandBackpackClearMsg implements I18nMessageHolder {
 
     public static final LocaleMessage FEATURE_DISABLED =
             LocaleMessage.of("command.backpack.clear.feature-disabled", "§cClear backpack feature is not enabled.");

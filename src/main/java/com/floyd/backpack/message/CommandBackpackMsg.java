@@ -1,11 +1,14 @@
 package com.floyd.backpack.message;
 
+import com.floyd.core.i18n.I18nMessageHolder;
 import com.floyd.core.i18n.LocaleMessage;
+import org.springframework.stereotype.Component;
 
 /**
  * @author floyd
  */
-public class CommandBackpackMsg {
+@Component
+public class CommandBackpackMsg implements I18nMessageHolder {
 
     public static final LocaleMessage CONSOLE_NOT_ALLOWED =
             LocaleMessage.of("command.backpack.console-not-allowed", "§cCannot execute this command from console.");
