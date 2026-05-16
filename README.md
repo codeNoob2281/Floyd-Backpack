@@ -4,34 +4,35 @@
 ![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.11-green)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 
-**Floyd-Backpack** 是一个基于 PaperMC 的 Minecraft 背包插件，为玩家提供额外的存储空间管理功能。
+**Floyd-Backpack** 是一个基于 PaperMC 的 Minecraft 背包插件，为每位玩家提供独立的 54 格背包空间（双箱容量），支持数据持久化、多语言和背包工具物品快捷打开。
 
-## ✨ 特性
+> 详细的插件使用、命令、权限和配置说明请参阅 [插件使用指南](docs/plugin-guide.md)。
 
-- 🎒 **54 格背包** - 提供大型储物空间（双箱容量）
-- 💾 **数据持久化** - 自动保存玩家背包数据
-- 🧹 **清空功能** - 支持一键清空背包（带二次确认）
-- 🎨 **自定义界面** - 显示玩家专属背包界面
-- ⚡ **高性能** - 基于 Floyd-Core 框架开发
+## 特性
 
-## 📋 依赖
+- **54 格背包** - 每位玩家拥有独立的双箱容量存储空间
+- **背包工具** - 玩家加入/重生时自动获取工具物品，右键即可打开背包
+- **数据持久化** - 玩家退出时自动保存，服务器关闭时批量持久化
+- **清空功能** - 支持一键清空背包（带二次确认防误操作）
+- **国际化** - 支持英文和简体中文，可动态切换
+- **高性能** - 基于 Spring DI + Floyd-Core 框架，支持并发安全访问
+- **自定义界面** - 标题随语言设置动态变化
+
+## 依赖
 
 - **Java**: 21 或更高版本
 - **Minecraft**: 1.21+
 - **服务端**: PaperMC 或兼容的服务端
-- **前置插件**: 
-  - Floyd-Core (必需)
-  - Lombok (编译时)
 
-## 🚀 安装
+## 安装
 
-### 方式一：手动安装
+### 手动安装
 
-1. 下载 `floyd-backpack-1.0.0-SNAPSHOT.jar` 文件
+1. 从 [Releases](https://github.com/codeNoob2281/Floyd-Backpack/releases) 下载最新版本
 2. 将 jar 文件放入服务端的 `plugins` 目录
-3. 重启服务器
+3. 重启服务器或使用 `/reload`
 
-### 方式二：源码构建
+### 源码构建
 
 ```bash
 # 克隆项目
@@ -44,127 +45,75 @@ cd Floyd-Backpack
 mvn clean package
 ```
 
-构建完成后，jar 文件位于 `target/` 目录
+构建完成后，jar 文件位于 `target/` 目录。
 
-## ⌨️ 命令
-
-| 命令 | 别名 | 权限 | 描述 |
-|------|------|------|------|
-| `/backpack` | `/bp` | 无 | 打开个人背包 |
-| `/bp open` | - | 无 | 打开背包（默认子命令） |
-| `/bp clear` | - | 无 | 清空背包（需二次确认） |
-
-### 命令示例
-
-```bash
-# 打开背包
-/bp
-
-# 或使用完整命令
-/backpack
-
-# 清空背包（会触发二次确认）
-/bp clear
-
-# 确认清空（不可逆操作）
-/bp clear confirm
-
-# 取消清空
-/bp clear cancel
-```
-
-## ⚙️ 配置
-
-配置文件位置：`plugins/FloydBackpack/config.yml`
-
-```yaml
-logging:
-  file:
-    enable: false  # 是否启用文件日志
-```
-
-## 📁 数据存储
-
-玩家背包数据存储在：
-```
-plugins/FloydBackpack/backpack/
-```
-
-每个玩家的背包数据会以 UUID 命名单独保存，确保数据持久化。
-
-## 🛠️ 开发
-
-### 技术栈
-
-- **语言**: Java 21
-- **构建工具**: Maven
-- **核心框架**: Floyd-Core
-- **API**: PaperMC API 1.21.11
-- **工具库**: Lombok, Adventure API
-
-### 项目结构
+## 项目结构
 
 ```
 Floyd-Backpack/
 ├── src/main/
 │   ├── java/com/floyd/backpack/
 │   │   ├── command/           # 命令处理器
+│   │   ├── constant/          # 常量和权限定义
 │   │   ├── entity/            # 实体类（背包）
+│   │   ├── enums/             # 枚举
 │   │   ├── event/             # 事件监听
-│   │   ├── injection/         # 依赖注入
+│   │   ├── injection/         # 依赖注入配置
+│   │   ├── message/           # 国际化消息
 │   │   ├── service/           # 业务逻辑层
-│   │   └── FloydBackpackPlugin.java  # 主类
+│   │   ├── setting/           # 配置属性
+│   │   └── tools/             # 工具物品
 │   └── resources/
 │       ├── config.yml         # 配置文件
-│       └── plugin.yml         # 插件描述
-└── pom.xml                    # Maven 配置
+│       ├── plugin.yml         # 插件描述
+│       └── language/          # 语言文件
+├── docs/
+│   └── plugin-guide.md        # 插件使用指南
+└── pom.xml
 ```
 
-### 编译环境
+## 技术栈
 
-```xml
-<java.version>21</java.version>
-<maven.compiler.source>21</maven.compiler.source>
-<maven.compiler.target>21</maven.compiler.target>
-```
+- **语言**: Java 21
+- **构建工具**: Maven
+- **核心框架**: Floyd-Core（Maven 依赖，内嵌于插件中）
+- **API**: PaperMC API 1.21.11
+- **工具库**: Lombok, Adventure API
 
-## 📝 使用说明
+## 贡献
 
-1. **打开背包**: 在游戏中输入 `/bp` 即可打开个人背包
-2. **存储物品**: 将物品拖入背包界面即可存储
-3. **取出物品**: 从背包界面取出物品到玩家物品栏
-4. **清空背包**: 使用 `/bp clear` 并确认后清空所有物品
+1. Fork 本仓库
+2. 创建特性分支 (`git checkout -b feature/amazing-feature`)
+3. 提交改动 (`git commit -m 'Add amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 提交 Pull Request
 
-## ⚠️ 注意事项
+## 许可证
 
-- 清空背包是**不可逆操作**，请谨慎使用
-- 背包数据会在服务器关闭时自动保存
-- 确保已安装 Floyd-Core 前置插件
-- 控制台无法执行背包相关命令
+本项目采用 GPL 3.0 开源许可证。查看 [LICENSE](LICENSE) 文件了解详情。
 
-## 🐛 问题反馈
-
-如遇到问题，请提交至：[GitHub Issues](https://github.com/codeNoob2281/Floyd-Backpack/issues)
-
-## 📄 许可证
-
-本项目采用 Apache License 2.0 开源许可证。查看 [LICENSE](LICENSE) 文件了解详情。
-
-## 👨‍💻 作者
+## 作者
 
 - **floyd** - [codeNoob2281](https://github.com/codeNoob2281)
 
-## 🔄 更新日志
+## 更新日志
 
-### v1.0.0-SNAPSHOT (2026-03-25)
+### v1.0.3
+- 新增国际化支持（英文/简体中文）
+- 日志打印内容优化
+- 子命令处理重构
+- 修复物品拖拽时的工具物品拦截逻辑
 
-- ✨ 初始版本发布
-- 🎒 实现 54 格背包系统
-- 💾 实现背包数据持久化
-- 🧹 添加背包清空功能（带二次确认）
-- 🎨 集成 Adventure API 消息系统
-- ⚡ 基于 Floyd-Core 框架优化性能
+### v1.0.2
+- 新增背包工具物品，支持右键快捷打开背包
+- 新增配置文件热重载命令
+- 优化并发数据访问安全
 
----
+### v1.0.0
 
-**Enjoy coding!** 🎉
+- 初始版本发布
+- 实现 54 格背包系统
+- 实现背包数据持久化
+- 添加背包清空功能（带二次确认）
+- 集成 Adventure API 消息系统
+- 基于 Floyd-Core 框架优化性能
