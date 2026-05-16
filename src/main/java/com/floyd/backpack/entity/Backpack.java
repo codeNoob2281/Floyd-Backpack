@@ -68,12 +68,11 @@ public class Backpack implements InventoryHolder {
         if (inventory != null && localeTitle.equals(title)) {
             return;
         }
-        Inventory oldInventory = inventory;
-        inventory = null;
         synchronized (this) {
-            if (inventory != null) {
+            if (inventory != null && localeTitle.equals(title)) {
                 return;
             }
+            Inventory oldInventory = inventory;
             inventory = Bukkit.createInventory(this, size, localeTitle);
             if (oldInventory != null) {
                 inventory.setContents(oldInventory.getContents());

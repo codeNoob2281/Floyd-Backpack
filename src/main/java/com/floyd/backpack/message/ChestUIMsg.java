@@ -12,5 +12,5 @@ import org.springframework.stereotype.Component;
 public class ChestUIMsg implements I18nMessageHolder {
 
     public static final LocaleMessage BACKPACK_TITLE =
-            LocaleMessage.of("chest-ui.backpack-title", "{0}'s backpack");
+            LocaleMessage.of("chest-ui.backpack-title", "{0}''s backpack");
 }

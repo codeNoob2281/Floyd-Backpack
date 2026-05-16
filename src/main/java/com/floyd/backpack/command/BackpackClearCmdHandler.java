@@ -137,10 +137,10 @@ public class BackpackClearCmdHandler extends AbstractCmdHandler {
         Player player = (Player) sender;
         Backpack backpack = playerBackpackManager.getBackpack(player);
         Inventory inventory = backpack.getInventory();
-        List<ItemStack> itemStackList = Arrays.stream(inventory.getStorageContents())
-                .filter(Objects::nonNull).toList();
+        long clearItemCount = Arrays.stream(inventory.getStorageContents())
+                .filter(Objects::nonNull).count();
         inventory.clear();
-        return itemStackList.size();
+        return (int) clearItemCount;
     }
 
 }
