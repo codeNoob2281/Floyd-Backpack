@@ -1,8 +1,8 @@
 package com.floyd.backpack.entity;
 
+import com.floyd.backpack.message.ChestUIMsg;
 import lombok.Getter;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -18,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class Backpack implements InventoryHolder {
 
-    private final Inventory inventory;
+    private volatile Inventory inventory;
 
     public static final int DEFAULT_SIZE = 54;
 
@@ -37,6 +37,10 @@ public class Backpack implements InventoryHolder {
     @Getter
     private final Lock lock = new ReentrantLock();
 
+    @Getter
+    @Setter
+    private String title;
+
     public Backpack(@NotNull Player player) {
         this(player.getUniqueId().toString(), player.getName(), DEFAULT_SIZE);
     }
@@ -48,11 +52,32 @@ public class Backpack implements InventoryHolder {
         this.playerUuid = playerUuid;
         this.playerName = playerName;
         this.size = size;
-        this.inventory = Bukkit.createInventory(this, size, Component.text(playerName + "的背包", NamedTextColor.GOLD));
     }
 
     @Override
     public @NotNull Inventory getInventory() {
+        createNewInventoryIfTitleChange();
         return this.inventory;
+    }
+
+    /**
+     * 创建新的背包
+     */
+    protected void createNewInventoryIfTitleChange() {
+        String localeTitle = ChestUIMsg.BACKPACK_TITLE.content(playerName);
+        if (inventory != null && localeTitle.equals(title)) {
+            return;
+        }
+        synchronized (this) {
+            if (inventory != null && localeTitle.equals(title)) {
+                return;
+            }
+            Inventory oldInventory = inventory;
+            inventory = Bukkit.createInventory(this, size, localeTitle);
+            if (oldInventory != null) {
+                inventory.setContents(oldInventory.getContents());
+            }
+            title = localeTitle;
+        }
     }
 }

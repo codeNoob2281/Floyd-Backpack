@@ -1,13 +1,12 @@
 package com.floyd.backpack;
 
-import com.floyd.backpack.command.BackpackCmdExecutor;
 import com.floyd.backpack.event.BackpackEventListener;
 import com.floyd.backpack.service.ConfirmOperationManager;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.setting.SettingsReloadManager;
 import com.floyd.core.FloydPlugin;
 import com.floyd.core.PluginBizException;
-import com.floyd.core.logging.ConsoleLogger;
+import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
 import com.floyd.core.settings.PluginSettingsManager;
 import org.bukkit.Bukkit;
@@ -16,8 +15,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,7 +29,7 @@ import java.util.List;
 
 public class FloydBackpackPlugin extends FloydPlugin {
 
-    private static final ConsoleLogger logger = ConsoleLoggerFactory.get(FloydBackpackPlugin.class);
+    private static final Logger logger = ConsoleLoggerFactory.get(FloydBackpackPlugin.class);
 
     @Override
     public String getPluginName() {
@@ -41,9 +38,6 @@ public class FloydBackpackPlugin extends FloydPlugin {
 
     @Override
     protected void initialize() {
-        // 绑定指令
-        Bukkit.getPluginCommand("backpack")
-                .setExecutor(getApplicationContext().getBean(BackpackCmdExecutor.class));
         // 注册事件监听器
         registerEventListener();
         // 初始化目录
@@ -67,7 +61,7 @@ public class FloydBackpackPlugin extends FloydPlugin {
      */
     protected synchronized boolean reload() {
         try {
-            logger.info("正在重载配置...");
+            logger.info("Reloading config...");
             ApplicationContext applicationContext = getApplicationContext();
             // 重新加载配置
             SettingsReloadManager settingsReloadManager = applicationContext.getBean(SettingsReloadManager.class);
@@ -78,10 +72,10 @@ public class FloydBackpackPlugin extends FloydPlugin {
             // 重载日志系统
             PluginSettingsManager pluginSettingsManager = applicationContext.getBean(PluginSettingsManager.class);
             ConsoleLoggerFactory.reloadFromConfig(pluginSettingsManager);
-            logger.info("配置重载完成！");
+            logger.info("Config reload completed!");
             return true;
         } catch (Exception e) {
-            logger.error("配置重载失败！", e);
+            logger.error("Config reload failed!", e);
             return false;
         }
     }
@@ -91,7 +85,7 @@ public class FloydBackpackPlugin extends FloydPlugin {
         File backpackDataDir = BackpackPluginAccessor.getBackpackDataPath().toFile();
         if (!backpackDataDir.exists()) {
             if (!backpackDataDir.mkdirs()) {
-                throw new PluginBizException("创建数据目录失败：" + backpackDataDir.getAbsolutePath());
+                throw new PluginBizException("Failed to create data directory: " + backpackDataDir.getAbsolutePath());
             }
         }
     }

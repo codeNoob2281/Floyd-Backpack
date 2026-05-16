@@ -1,15 +1,14 @@
 package com.floyd.backpack.service;
 
 import com.floyd.backpack.BackpackPluginAccessor;
-import com.floyd.backpack.FloydBackpackPlugin;
-import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
 import com.floyd.backpack.constant.Constants;
 import com.floyd.backpack.enums.ConfirmOperationEnum;
-import com.floyd.core.logging.ConsoleLogger;
+import com.floyd.backpack.message.CommandBackpackClearMsg;
+import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
+import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
 import com.floyd.core.settings.PluginSettingsManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -31,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @org.springframework.stereotype.Component
 public class ConfirmOperationManager implements InitializingBean, DisposableBean {
 
-    private static final ConsoleLogger logger = ConsoleLoggerFactory.get(ConfirmOperationManager.class);
+    private static final Logger logger = ConsoleLoggerFactory.get(ConfirmOperationManager.class);
 
     private final Map<ConfirmOperationEnum, Map<String, Long>> lastConfirmOperationTimestampMap = new ConcurrentHashMap<>(8);
 
@@ -135,8 +134,7 @@ public class ConfirmOperationManager implements InitializingBean, DisposableBean
                     if (ttl != null && ttl == 0) {
                         Player player = Bukkit.getPlayer(UUID.fromString(existUuid));
                         if (player != null) {
-                            player.sendMessage(Component.text(Constants.MESSAGE_PREFIX, NamedTextColor.YELLOW)
-                                    .append(Component.text(" 上一个操作已过期", NamedTextColor.GOLD)));
+                            player.sendMessage(Component.text(CommandBackpackClearMsg.OPERATION_EXPIRED.content()));
                         }
                         removedKeyCount.incrementAndGet();
                     }
@@ -144,7 +142,7 @@ public class ConfirmOperationManager implements InitializingBean, DisposableBean
             });
             int res = removedKeyCount.get();
             if (res > 0) {
-                logger.info(res + "个过期的二次确认信息被移除");
+                logger.info("{} expired confirmation operation(s) removed", res);
             }
         }, tickPeriod, tickPeriod);
     }

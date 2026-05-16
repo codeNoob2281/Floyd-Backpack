@@ -1,18 +1,17 @@
 package com.floyd.backpack.event;
 
-import com.floyd.backpack.service.BackpackCmdService;
+import com.floyd.backpack.command.BackpackSubCmdHandler;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.tools.OpenBackpackTool;
-import com.floyd.core.logging.ConsoleLogger;
+import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
-import com.floyd.core.logging.LogLevel;
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -25,16 +24,16 @@ import org.bukkit.inventory.ItemStack;
  */
 public class BackpackEventListener implements Listener {
 
-    private static final ConsoleLogger logger = ConsoleLoggerFactory.get(BackpackEventListener.class);
+    private static final Logger logger = ConsoleLoggerFactory.get(BackpackEventListener.class);
 
     private final PlayerBackpackManager playerBackpackManager;
 
-    private final BackpackCmdService backpackCmdService;
+    private final BackpackSubCmdHandler backpackSubCmdHandler;
 
     public BackpackEventListener(PlayerBackpackManager playerBackpackManager,
-                                 BackpackCmdService backpackCmdService) {
+                                 BackpackSubCmdHandler backpackSubCmdHandler) {
         this.playerBackpackManager = playerBackpackManager;
-        this.backpackCmdService = backpackCmdService;
+        this.backpackSubCmdHandler = backpackSubCmdHandler;
     }
 
     @EventHandler
@@ -45,12 +44,12 @@ public class BackpackEventListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        logger.info("检测到玩家退出，开始保存玩家[" + player.getName() + "]的背包数据");
+        logger.info("Player quit detected, saving backpack data for player [{}]", player.getName());
         boolean res = playerBackpackManager.flushBackpackToFile(player);
         if (res) {
-            logger.info("保存玩家[" + player.getName() + "]的背包数据完成");
+            logger.info("Backpack data saved for player [{}]", player.getName());
         } else {
-            logger.warn("保存玩家[" + player.getName() + "]的背包数据失败");
+            logger.warn("Failed to save backpack data for player [{}]", player.getName());
         }
     }
 
@@ -62,8 +61,12 @@ public class BackpackEventListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (OpenBackpackTool.matchEvent(event)) {
-            backpackCmdService.onOpenBackpackCmd(event.getPlayer());
             event.setCancelled(true);
+            Player player = event.getPlayer();
+            backpackSubCmdHandler.onOpenBackpackCmd(player);
+            player.playSound(Sound.sound()
+                    .type(org.bukkit.Sound.BLOCK_CHEST_OPEN)
+                    .build());
         }
     }
 

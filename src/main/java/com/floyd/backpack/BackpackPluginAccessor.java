@@ -1,5 +1,7 @@
 package com.floyd.backpack;
 
+import com.floyd.core.i18n.I18nMessageProvider;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -11,6 +13,8 @@ import java.nio.file.Paths;
 public class BackpackPluginAccessor {
 
     private static volatile FloydBackpackPlugin INSTANCE;
+
+    private static volatile I18nMessageProvider MESSAGE_PROVIDER;
 
     public static String getPluginName() {
         return getPlugin().getPluginName();
