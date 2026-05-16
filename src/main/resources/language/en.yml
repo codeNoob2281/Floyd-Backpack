@@ -25,3 +25,7 @@ command:
       operation-expired: "§e[Floyd-Backpack] §6Previous operation has expired."
 chest-ui:
   backpack-title: "§6{0}''s backpack"
+backpack-tool:
+  item-name: "§b[Floyd-Backpack]§6 Right-click to open backpack"
+  lore-line1: "§aHold this item and right-click to open backpack"
+  lore-line2: "§aOr use the /bp command to open"

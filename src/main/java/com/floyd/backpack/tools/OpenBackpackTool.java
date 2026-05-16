@@ -1,13 +1,14 @@
 package com.floyd.backpack.tools;
 
-import com.floyd.backpack.constant.Constants;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import com.floyd.backpack.message.BackpackToolMsg;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
 
@@ -18,22 +19,29 @@ import java.util.List;
  */
 public class OpenBackpackTool extends AbstractTool {
 
-    private static final ItemStack ITEM_STACK_TEMPLATE = initItemStack();
+    private static final NamespacedKey BACKPACK_TOOL_KEY = new NamespacedKey("floydbackpack", "backpack_tool");
+
+    private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
 
     /**
      * 获取ItemStack
-     *
-     * @return
      */
     public static ItemStack getItemStack() {
-        return initItemStack();
+        ItemStack is = new ItemStack(Material.ENDER_EYE, 1);
+        ItemMeta itemMeta = is.getItemMeta();
+        itemMeta.addEnchant(Enchantment.UNBREAKING, 10, true);
+        itemMeta.itemName(LEGACY_SERIALIZER.deserialize(BackpackToolMsg.ITEM_NAME.content()));
+        itemMeta.lore(List.of(
+                LEGACY_SERIALIZER.deserialize(BackpackToolMsg.LORE_LINE1.content()),
+                LEGACY_SERIALIZER.deserialize(BackpackToolMsg.LORE_LINE2.content())
+        ));
+        itemMeta.getPersistentDataContainer().set(BACKPACK_TOOL_KEY, PersistentDataType.BOOLEAN, true);
+        is.setItemMeta(itemMeta);
+        return is;
     }
 
     /**
      * 匹配交互事件
-     *
-     * @param event
-     * @return
      */
     public static boolean matchEvent(PlayerInteractEvent event) {
         if (event == null || !event.getAction().isRightClick()) {
@@ -44,21 +52,18 @@ public class OpenBackpackTool extends AbstractTool {
     }
 
     public static boolean matchItemStack(ItemStack itemStack) {
-        return itemStack != null && ITEM_STACK_TEMPLATE.isSimilar(itemStack);
-    }
-
-    private static ItemStack initItemStack() {
-        ItemStack is = new ItemStack(Material.ENDER_EYE, 1);
-        ItemMeta itemMeta = is.getItemMeta();
-        itemMeta.addEnchant(Enchantment.UNBREAKING, 10, true);
-        itemMeta.itemName(Component.text(Constants.MESSAGE_PREFIX, NamedTextColor.AQUA)
-                .append(Component.text(" 右键打开背包", NamedTextColor.GOLD)));
-        itemMeta.lore(List.of(
-                loreText("手持该物品，右键打开背包", NamedTextColor.GREEN),
-                loreText("也可以输入指令/bp打开", NamedTextColor.GREEN)
-        ));
-        is.setItemMeta(itemMeta);
-        return is;
+        if (itemStack == null || !itemStack.hasItemMeta()) {
+            return false;
+        }
+        ItemMeta meta = itemStack.getItemMeta();
+        // Check PDC tag (current format, supports all locales)
+        if (meta.getPersistentDataContainer().has(BACKPACK_TOOL_KEY, PersistentDataType.BOOLEAN)) {
+            return true;
+        }
+        // Backward compatibility: match legacy items by material and enchantment
+        return itemStack.getType() == Material.ENDER_EYE
+                && meta.hasEnchant(Enchantment.UNBREAKING)
+                && meta.getEnchantLevel(Enchantment.UNBREAKING) == 10;
     }
 
 }
