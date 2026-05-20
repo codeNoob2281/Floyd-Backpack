@@ -1,6 +1,7 @@
 package com.floyd.backpack.tools;
 
 import com.floyd.backpack.message.BackpackToolMsg;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -32,8 +33,8 @@ public class OpenBackpackTool extends AbstractTool {
         itemMeta.addEnchant(Enchantment.UNBREAKING, 10, true);
         itemMeta.itemName(LEGACY_SERIALIZER.deserialize(BackpackToolMsg.ITEM_NAME.content()));
         itemMeta.lore(List.of(
-                LEGACY_SERIALIZER.deserialize(BackpackToolMsg.LORE_LINE1.content()),
-                LEGACY_SERIALIZER.deserialize(BackpackToolMsg.LORE_LINE2.content())
+                LEGACY_SERIALIZER.deserialize(BackpackToolMsg.LORE_LINE1.content()).decoration(TextDecoration.ITALIC, false),
+                LEGACY_SERIALIZER.deserialize(BackpackToolMsg.LORE_LINE2.content()).decoration(TextDecoration.ITALIC, false)
         ));
         itemMeta.getPersistentDataContainer().set(BACKPACK_TOOL_KEY, PersistentDataType.BOOLEAN, true);
         is.setItemMeta(itemMeta);
