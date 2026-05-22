@@ -19,7 +19,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +45,7 @@ public class BackpackClearCmdHandler extends AbstractCmdHandler {
     }
 
     @SubCommandMapping(commands = "clear", permission = PermConstant.CLEAR_BACKPACK)
-    public boolean onClearBackpackCmd(@NonNull CommandSender sender) {
+    public boolean onClearBackpackCmd(@NotNull CommandSender sender) {
         boolean isPlayer = checkIsPlayer(sender);
         Boolean enable = pluginSettingsManager.getProperty(CmdClearBackPackSettings.ENABLE);
         if (!enable) {
@@ -86,7 +85,7 @@ public class BackpackClearCmdHandler extends AbstractCmdHandler {
     }
 
     @SubCommandMapping(commands = {"clear", "confirm"}, permission = PermConstant.CLEAR_BACKPACK)
-    public boolean onClearConfirmCmd(@NonNull CommandSender sender) {
+    public boolean onClearConfirmCmd(@NotNull CommandSender sender) {
         if (!checkIsPlayer(sender)) {
             sender.sendMessage(CommandBackpackMsg.CONSOLE_NOT_ALLOWED.content());
             return false;
@@ -104,7 +103,7 @@ public class BackpackClearCmdHandler extends AbstractCmdHandler {
     }
 
     @SubCommandMapping(commands = {"clear", "cancel"}, permission = PermConstant.CLEAR_BACKPACK)
-    public boolean onClearCancelCmd(@NonNull CommandSender sender) {
+    public boolean onClearCancelCmd(@NotNull CommandSender sender) {
         if (!checkIsPlayer(sender)) {
             sender.sendMessage(CommandBackpackMsg.CONSOLE_NOT_ALLOWED.content());
             return false;
@@ -122,13 +121,13 @@ public class BackpackClearCmdHandler extends AbstractCmdHandler {
     }
 
 
-    private void execClearBackpack(@NonNull CommandSender sender) {
+    private void execClearBackpack(@NotNull CommandSender sender) {
         int clearItemSize = clearBackpack(sender);
         sender.sendMessage(CommandBackpackClearMsg.CLEARED.content(clearItemSize));
         logger.info("Cleared backpack for [{}], removed [{}] items", sender.getName(), clearItemSize);
     }
 
-    private static void sendClearConfirmTipMsg(@NonNull CommandSender sender) {
+    private static void sendClearConfirmTipMsg(@NotNull CommandSender sender) {
         sender.sendMessage(CommandBackpackClearMsg.TIP_CONFIRM.content());
         sender.sendMessage(CommandBackpackClearMsg.TIP_CANCEL.content());
     }

@@ -16,7 +16,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
 import org.springframework.util.StopWatch;
 
 /**
@@ -50,7 +49,7 @@ public class BackpackSubCmdHandler extends AbstractCmdHandler {
     }
 
     @SubCommandMapping(commands = "reload", permission = PermConstant.RELOAD_CONFIG)
-    public void onReloadCmd(@NonNull CommandSender sender, @NonNull @NotNull String @NonNull [] args) {
+    public void onReloadCmd(@NotNull CommandSender sender, @NotNull String @NotNull [] args) {
         sender.sendMessage(CommandBackpackMsg.RELOAD_START.content());
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -64,7 +63,7 @@ public class BackpackSubCmdHandler extends AbstractCmdHandler {
     }
 
     @SubCommandMapping(commands = "help", permission = PermConstant.SHOW_HELP)
-    public void onShowHelpCmd(@NonNull CommandSender sender, @NonNull @NotNull String @NonNull [] args) {
+    public void onShowHelpCmd(@NotNull CommandSender sender, @NotNull String @NotNull [] args) {
         sender.sendMessage(CommandBackpackHelpMsg.TITLE.content());
         sender.sendMessage(CommandBackpackHelpMsg.COMMANDS_HEADER.content());
         sender.sendMessage(CommandBackpackHelpMsg.CMD_OPEN_DESC.content());
@@ -75,14 +74,14 @@ public class BackpackSubCmdHandler extends AbstractCmdHandler {
     }
 
     @SubCommandMapping(commands = "version", permission = PermConstant.SHOW_VERSION)
-    public void onVersionCmd(@NonNull CommandSender sender) {
+    public void onVersionCmd(@NotNull CommandSender sender) {
         String version = BackpackPluginAccessor.getPlugin().getPluginMeta().getVersion();
         String author = String.join(", ", BackpackPluginAccessor.getPlugin().getPluginMeta().getAuthors());
         sender.sendMessage(CommandBackpackMsg.VERSION_INFO.content(version, author));
     }
 
     @SubCommandMapping(isFallback = true)
-    public boolean onErrorCmd(@NonNull CommandSender sender, @NotNull String @NonNull [] args) {
+    public boolean onErrorCmd(@NotNull CommandSender sender, @NotNull String @NotNull [] args) {
         onShowHelpCmd(sender, args);
         return false;
     }
