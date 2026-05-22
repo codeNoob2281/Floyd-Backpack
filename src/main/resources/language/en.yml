@@ -6,12 +6,15 @@ command:
       success: "§aReload completed in {0}ms."
       failure: "§cReload failed, please check the console for errors!"
     help:
-      line1: "§b[Floyd-Backpack] §a§lHelp Info"
-      line2: "§6§n>> Commands"
-      line3: "§3/bp open §e- §7Open Backpack"
-      line4: "§3/bp clear §e- §7Clear Backpack"
-      line5: "§3/bp reload §e- §7Reload Config"
-      line6: "§eVisit §f§nhttps://github.com/codeNoob2281/Floyd-Backpack§e for more info."
+      title: "§b[Floyd-Backpack] §a§lHelp Info"
+      commands-header: "§6§n>> Commands"
+      cmd-open: "§3/bp open §e- §7Open Backpack"
+      cmd-clear: "§3/bp clear §e- §7Clear Backpack"
+      cmd-reload: "§3/bp reload §e- §7Reload Config"
+      cmd-version: "§3/bp version §e- §7Show version info"
+      more-info: "§eVisit §f§nhttps://github.com/codeNoob2281/Floyd-Backpack§e for more info."
+    version:
+      info: "§b[Floyd-Backpack] §aVersion: {0} §7| §aAuthor: {1}"
     clear:
       feature-disabled: "§cClear backpack feature is not enabled."
       pending-operation-exists: "§eA pending confirmation operation already exists, please proceed."

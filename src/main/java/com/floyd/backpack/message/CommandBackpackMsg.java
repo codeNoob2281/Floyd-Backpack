@@ -21,4 +21,7 @@ public class CommandBackpackMsg implements I18nMessageHolder {
 
     public static final LocaleMessage RELOAD_FAILURE =
             LocaleMessage.of("command.backpack.reload.failure", "§cReload failed, please check the console for errors!");
+
+    public static final LocaleMessage VERSION_INFO =
+            LocaleMessage.of("command.backpack.version.info", "§b[Floyd-Backpack] §aVersion: {0} §7| §aAuthor: {1}");
 }

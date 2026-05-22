@@ -65,12 +65,20 @@ public class BackpackSubCmdHandler extends AbstractCmdHandler {
 
     @SubCommandMapping(commands = "help", permission = PermConstant.SHOW_HELP)
     public void onShowHelpCmd(@NonNull CommandSender sender, @NonNull @NotNull String @NonNull [] args) {
-        sender.sendMessage(CommandBackpackHelpMsg.LINE1.content());
-        sender.sendMessage(CommandBackpackHelpMsg.LINE2.content());
-        sender.sendMessage(CommandBackpackHelpMsg.LINE3.content());
-        sender.sendMessage(CommandBackpackHelpMsg.LINE4.content());
-        sender.sendMessage(CommandBackpackHelpMsg.LINE5.content());
-        sender.sendMessage(CommandBackpackHelpMsg.LINE6.content());
+        sender.sendMessage(CommandBackpackHelpMsg.TITLE.content());
+        sender.sendMessage(CommandBackpackHelpMsg.COMMANDS_HEADER.content());
+        sender.sendMessage(CommandBackpackHelpMsg.CMD_OPEN_DESC.content());
+        sender.sendMessage(CommandBackpackHelpMsg.CMD_CLEAR_DESC.content());
+        sender.sendMessage(CommandBackpackHelpMsg.CMD_RELOAD_DESC.content());
+        sender.sendMessage(CommandBackpackHelpMsg.CMD_VERSION_DESC.content());
+        sender.sendMessage(CommandBackpackHelpMsg.MORE_INFO.content());
+    }
+
+    @SubCommandMapping(commands = "version", permission = PermConstant.SHOW_VERSION)
+    public void onVersionCmd(@NonNull CommandSender sender) {
+        String version = BackpackPluginAccessor.getPlugin().getPluginMeta().getVersion();
+        String author = String.join(", ", BackpackPluginAccessor.getPlugin().getPluginMeta().getAuthors());
+        sender.sendMessage(CommandBackpackMsg.VERSION_INFO.content(version, author));
     }
 
     @SubCommandMapping(isFallback = true)
