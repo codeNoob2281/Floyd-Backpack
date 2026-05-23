@@ -19,7 +19,7 @@ public class BackpackPluginAccessor {
     }
 
     public static Path getBackpackDataPath() {
-        return Paths.get(getPlugin().getDataFolder().toPath().toString(), "backpack");
+        return getPlugin().getDataFolder().toPath().resolve("backpack");
     }
 
     public static boolean reload() {

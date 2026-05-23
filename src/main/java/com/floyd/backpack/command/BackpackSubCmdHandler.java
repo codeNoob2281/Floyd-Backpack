@@ -12,6 +12,7 @@ import com.floyd.core.command.SubCommandMapping;
 import com.floyd.core.i18n.I18nMessageProvider;
 import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
+import io.papermc.paper.plugin.configuration.PluginMeta;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -75,9 +76,9 @@ public class BackpackSubCmdHandler extends AbstractCmdHandler {
 
     @SubCommandMapping(commands = "version", permission = PermConstant.SHOW_VERSION)
     public void onVersionCmd(@NotNull CommandSender sender) {
-        String version = BackpackPluginAccessor.getPlugin().getPluginMeta().getVersion();
-        String author = String.join(", ", BackpackPluginAccessor.getPlugin().getPluginMeta().getAuthors());
-        sender.sendMessage(CommandBackpackMsg.VERSION_INFO.content(version, author));
+        PluginMeta meta = BackpackPluginAccessor.getPlugin().getPluginMeta();
+        String author = String.join(", ", meta.getAuthors());
+        sender.sendMessage(CommandBackpackMsg.VERSION_INFO.content(meta.getVersion(), author));
     }
 
     @SubCommandMapping(isFallback = true)
