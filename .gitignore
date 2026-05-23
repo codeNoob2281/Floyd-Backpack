@@ -14,3 +14,6 @@ buildNumber.properties
 
 # 依赖jar包不提交
 lib/
+
+# 本地临时文件
+tmp/
