@@ -14,14 +14,12 @@ public class BackpackPluginAccessor {
 
     private static volatile FloydBackpackPlugin INSTANCE;
 
-    private static volatile I18nMessageProvider MESSAGE_PROVIDER;
-
     public static String getPluginName() {
         return getPlugin().getPluginName();
     }
 
     public static Path getBackpackDataPath() {
-        return Paths.get(getPlugin().getDataPath().toString(), "backpack");
+        return getPlugin().getDataFolder().toPath().resolve("backpack");
     }
 
     public static boolean reload() {

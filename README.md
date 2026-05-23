@@ -1,7 +1,7 @@
 # Floyd-Backpack
 
 ![Java Version](https://img.shields.io/badge/Java-21-blue)
-![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.11-green)
+![Minecraft Version](https://img.shields.io/badge/Minecraft-1.20.6-green)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 
 **Floyd-Backpack** 是一个基于 PaperMC 的 Minecraft 背包插件，为每位玩家提供独立的 54 格背包空间（双箱容量），支持数据持久化、多语言和背包工具物品快捷打开。
@@ -21,7 +21,7 @@
 ## 依赖
 
 - **Java**: 21 或更高版本
-- **Minecraft**: 1.21+
+- **Minecraft**: 1.20.6+
 - **服务端**: PaperMC 或兼容的服务端
 
 ## 安装
@@ -77,7 +77,7 @@ Floyd-Backpack/
 - **语言**: Java 21
 - **构建工具**: Maven
 - **核心框架**: Floyd-Core（Maven 依赖，内嵌于插件中）
-- **API**: PaperMC API 1.21.11
+- **API**: PaperMC API 1.20.6
 - **工具库**: Lombok, Adventure API
 
 ## 贡献

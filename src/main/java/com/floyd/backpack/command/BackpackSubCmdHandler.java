@@ -12,11 +12,11 @@ import com.floyd.core.command.SubCommandMapping;
 import com.floyd.core.i18n.I18nMessageProvider;
 import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
+import io.papermc.paper.plugin.configuration.PluginMeta;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
 import org.springframework.util.StopWatch;
 
 /**
@@ -50,7 +50,7 @@ public class BackpackSubCmdHandler extends AbstractCmdHandler {
     }
 
     @SubCommandMapping(commands = "reload", permission = PermConstant.RELOAD_CONFIG)
-    public void onReloadCmd(@NonNull CommandSender sender, @NonNull @NotNull String @NonNull [] args) {
+    public void onReloadCmd(@NotNull CommandSender sender, @NotNull String @NotNull [] args) {
         sender.sendMessage(CommandBackpackMsg.RELOAD_START.content());
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -64,17 +64,25 @@ public class BackpackSubCmdHandler extends AbstractCmdHandler {
     }
 
     @SubCommandMapping(commands = "help", permission = PermConstant.SHOW_HELP)
-    public void onShowHelpCmd(@NonNull CommandSender sender, @NonNull @NotNull String @NonNull [] args) {
-        sender.sendMessage(CommandBackpackHelpMsg.LINE1.content());
-        sender.sendMessage(CommandBackpackHelpMsg.LINE2.content());
-        sender.sendMessage(CommandBackpackHelpMsg.LINE3.content());
-        sender.sendMessage(CommandBackpackHelpMsg.LINE4.content());
-        sender.sendMessage(CommandBackpackHelpMsg.LINE5.content());
-        sender.sendMessage(CommandBackpackHelpMsg.LINE6.content());
+    public void onShowHelpCmd(@NotNull CommandSender sender, @NotNull String @NotNull [] args) {
+        sender.sendMessage(CommandBackpackHelpMsg.TITLE.content());
+        sender.sendMessage(CommandBackpackHelpMsg.COMMANDS_HEADER.content());
+        sender.sendMessage(CommandBackpackHelpMsg.CMD_OPEN_DESC.content());
+        sender.sendMessage(CommandBackpackHelpMsg.CMD_CLEAR_DESC.content());
+        sender.sendMessage(CommandBackpackHelpMsg.CMD_RELOAD_DESC.content());
+        sender.sendMessage(CommandBackpackHelpMsg.CMD_VERSION_DESC.content());
+        sender.sendMessage(CommandBackpackHelpMsg.MORE_INFO.content());
+    }
+
+    @SubCommandMapping(commands = "version", permission = PermConstant.SHOW_VERSION)
+    public void onVersionCmd(@NotNull CommandSender sender) {
+        PluginMeta meta = BackpackPluginAccessor.getPlugin().getPluginMeta();
+        String author = String.join(", ", meta.getAuthors());
+        sender.sendMessage(CommandBackpackMsg.VERSION_INFO.content(meta.getVersion(), author));
     }
 
     @SubCommandMapping(isFallback = true)
-    public boolean onErrorCmd(@NonNull CommandSender sender, @NotNull String @NonNull [] args) {
+    public boolean onErrorCmd(@NotNull CommandSender sender, @NotNull String @NotNull [] args) {
         onShowHelpCmd(sender, args);
         return false;
     }

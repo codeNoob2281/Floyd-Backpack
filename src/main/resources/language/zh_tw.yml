@@ -1,0 +1,34 @@
+command:
+  backpack:
+    console-not-allowed: "§c無法通過控制臺執行此命令"
+    reload:
+      start: "§a正在重新加載配置..."
+      success: "§a重新加載配置完成，耗時{0}ms"
+      failure: "§c重新加載配置失敗，請前往控制臺查看異常！"
+    help:
+      title: "§b[Floyd-Backpack] §a§l幫助信息"
+      commands-header: "§6§n>> 命令列表"
+      cmd-open: "§3/bp open §e- §7打開背包"
+      cmd-clear: "§3/bp clear §e- §7清空背包"
+      cmd-reload: "§3/bp reload §e- §7重載配置"
+      cmd-version: "§3/bp version §e- §7顯示版本信息"
+      more-info: "§e訪問 §f§nhttps://github.com/codeNoob2281/Floyd-Backpack§e 獲取更多信息。"
+    version:
+      info: "§b[Floyd-Backpack] §a版本: {0} §7| §a作者: {1}"
+    clear:
+      feature-disabled: "§c當前未啟用清空背包功能"
+      pending-operation-exists: "§e當前仍存在一個待確認的操作，請繼續執行"
+      confirm-delete: "§6是否確認刪除背包？請注意這是一個不可逆的操作"
+      confirm-timeout: "§9你有{0}s的時間處理該操作"
+      no-active-operation: "§e當前無活躍的二次確認操作"
+      operation-cancelled: "§e清空背包操作已取消"
+      cleared: "§a已清空背包，共移除§c{0}§a件物品"
+      tip-confirm: "§6輸入 §c/bp clear confirm §6確認"
+      tip-cancel: "§6輸入 §c/bp clear cancel §6取消"
+      operation-expired: "§e[Floyd-Backpack] §6上一個操作已過期"
+chest-ui:
+  backpack-title: "§6{0}的背包"
+backpack-tool:
+  item-name: "§b[Floyd-Backpack]§6 右鍵打開背包"
+  lore-line1: "§a§l手持該物品，右鍵打開背包"
+  lore-line2: "§a§l也可以輸入指令/bp打開"

@@ -30,4 +30,9 @@ public class PermConstant {
      */
     public static final String SHOW_HELP = PREFIX + "help";
 
+    /**
+     * 展示版本信息
+     */
+    public static final String SHOW_VERSION = PREFIX + "version";
+
 }
