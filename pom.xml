@@ -6,7 +6,7 @@
 
     <groupId>com.codefish.mc</groupId>
     <artifactId>floyd-backpack</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.4</version>
     <packaging>jar</packaging>
 
     <name>floyd-backpack</name>
@@ -14,7 +14,7 @@
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dependencies.floyd-core.version>1.0.5-SNAPSHOT</dependencies.floyd-core.version>
+        <dependencies.floyd-core.version>1.0.5</dependencies.floyd-core.version>
         <dependencies.lombok.version>1.18.30</dependencies.lombok.version>
         <dependencies.paper-api.version>1.20.6-R0.1-SNAPSHOT</dependencies.paper-api.version>
     </properties>
