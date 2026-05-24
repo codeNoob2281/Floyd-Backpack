@@ -27,6 +27,6 @@ public class UpgradeSettings implements PluginSettingsHolder {
     public static @NotNull StringProperty PLACEHOLDER_MATERIAL = newProperty("upgrade.placeholder-item.material", "GRAY_STAINED_GLASS_PANE");
 
     @Comment("Placeholder item display name")
-    public static @NotNull StringProperty PLACEHOLDER_NAME = newProperty("upgrade.placeholder-item.name", "§7未解锁");
+    public static @NotNull StringProperty PLACEHOLDER_NAME = newProperty("upgrade.placeholder-item.name", "§7UNLOCKED");
 
 }

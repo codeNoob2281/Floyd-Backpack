@@ -1,19 +1,18 @@
 package com.floyd.backpack.entity;
 
 import com.floyd.backpack.message.ChestUIMsg;
+import com.floyd.core.logging.ConsoleLoggerFactory;
+import com.floyd.core.logging.Logger;
 import lombok.Getter;
 import lombok.Setter;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import lombok.extern.slf4j.Slf4j;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.util.Assert;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -26,15 +25,13 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class Backpack implements InventoryHolder {
 
+    private static final Logger logger = ConsoleLoggerFactory.get(Backpack.class);
+
     private volatile Inventory inventory;
 
-    public static final int MIN_SIZE = 9;
+    public static final int MIN_SIZE = 1;
 
     public static final int MAX_SIZE = 54;
-
-    private static final NamespacedKey PLACEHOLDER_KEY = new NamespacedKey("floydbackpack", "placeholder");
-
-    private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
 
     @Getter
     private final String playerUuid;
@@ -63,9 +60,9 @@ public class Backpack implements InventoryHolder {
 
     private int cachedLevel;
 
-    private String placeholderMaterial;
+    private final String placeholderMaterial;
 
-    private String placeholderName;
+    private final String placeholderName;
 
     /**
      * 溢出物品映射（slot → base64），存储因降级而隐藏但未丢失的物品
@@ -81,6 +78,7 @@ public class Backpack implements InventoryHolder {
 
     public Backpack(String playerUuid, String playerName, int level, int usableSlots,
                     String placeholderMaterial, String placeholderName) {
+        usableSlots = fixedUsableSlots(usableSlots);
         int size = calculateInventorySize(usableSlots);
         if (size <= 0 || size % 9 != 0) {
             throw new IllegalArgumentException("illegal size: " + size);
@@ -103,6 +101,7 @@ public class Backpack implements InventoryHolder {
      * 更新背包等级和容量。调用后下次 getInventory() 会触发重建。
      */
     public void setUpgrade(int newLevel, int newUsableSlots) {
+        newUsableSlots = fixedUsableSlots(newUsableSlots);
         this.level = newLevel;
         this.usableSlots = newUsableSlots;
         this.size = calculateInventorySize(newUsableSlots);
@@ -146,36 +145,31 @@ public class Backpack implements InventoryHolder {
             }
         }
 
-        fillPlaceholders();
+        reFillPlaceholders();
         this.title = localeTitle;
         this.cachedLevel = this.level;
     }
 
-    private void fillPlaceholders() {
-        if (placeholderMaterial == null) {
-            return;
+    private void reFillPlaceholders() {
+        for (int i = 0; i < usableSlots; i++) {
+            ItemStack item = this.inventory.getItem(i);
+            if (PlaceHolderItem.isPlaceholder(item)) {
+                this.inventory.setItem(i, null);
+            }
         }
-        Material material = Material.getMaterial(placeholderMaterial);
-        if (material == null) {
-            return;
-        }
-
         for (int i = usableSlots; i < size; i++) {
-            ItemStack placeholder = new ItemStack(material);
-            ItemMeta meta = placeholder.getItemMeta();
-            meta.displayName(LEGACY_SERIALIZER.deserialize(placeholderName));
-            meta.getPersistentDataContainer().set(
-                    PLACEHOLDER_KEY, PersistentDataType.BOOLEAN, true);
-            placeholder.setItemMeta(meta);
-            this.inventory.setItem(i, placeholder);
+            this.inventory.setItem(i, new PlaceHolderItem(placeholderMaterial, placeholderName).getItemStack());
         }
     }
 
-    public static boolean isPlaceholder(ItemStack item) {
-        if (item == null || !item.hasItemMeta()) {
-            return false;
+    private int fixedUsableSlots(int usableSlotsToCheck) {
+        if (usableSlotsToCheck < MIN_SIZE || usableSlotsToCheck > MAX_SIZE) {
+            int fitUsableSlots = Math.max(MIN_SIZE, Math.min(MAX_SIZE, usableSlotsToCheck));
+            logger.warn("UsableSlots value should between {} and {} but got {}, using default value {}",
+                    MIN_SIZE, MAX_SIZE, usableSlotsToCheck, fitUsableSlots);
+            return fitUsableSlots;
         }
-        return item.getItemMeta().getPersistentDataContainer()
-                .has(PLACEHOLDER_KEY, PersistentDataType.BOOLEAN);
+        return usableSlotsToCheck;
     }
+
 }

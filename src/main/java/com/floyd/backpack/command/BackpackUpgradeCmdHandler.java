@@ -72,7 +72,7 @@ public class BackpackUpgradeCmdHandler extends AbstractCmdHandler {
                 .build());
     }
 
-    @SubCommandMapping(commands = "setlevel", permission = PermConstant.ADMIN_BACKPACK)
+    @SubCommandMapping(commands = "set-level", permission = PermConstant.ADMIN_BACKPACK)
     public void onSetLevelCmd(@NotNull CommandSender sender, @NotNull String @NotNull [] args) {
         if (args.length < 2) {
             sender.sendMessage(CommandBackpackUpgradeMsg.SETLEVEL_USAGE.content());
@@ -115,10 +115,8 @@ public class BackpackUpgradeCmdHandler extends AbstractCmdHandler {
 
         playerBackpackManager.setBackpackLevel(backpack, targetLevel, newUsableSlots);
 
-        // 重新打开背包
-        targetPlayer.openInventory(backpack.getInventory());
-
         sender.sendMessage(CommandBackpackUpgradeMsg.SETLEVEL_SUCCESS.content(
                 targetPlayer.getName(), targetLevel, newUsableSlots));
+        targetPlayer.sendMessage(CommandBackpackUpgradeMsg.UPGRADE_SUCCESS.content(targetLevel, newUsableSlots));
     }
 }

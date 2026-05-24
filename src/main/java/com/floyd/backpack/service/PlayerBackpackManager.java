@@ -2,6 +2,7 @@ package com.floyd.backpack.service;
 
 import com.floyd.backpack.BackpackPluginAccessor;
 import com.floyd.backpack.entity.Backpack;
+import com.floyd.backpack.entity.PlaceHolderItem;
 import com.floyd.backpack.setting.properties.UpgradeSettings;
 import com.floyd.core.inventory.io.BukkitItemStackSerializer;
 import com.floyd.core.inventory.io.ItemStackSerializer;
@@ -175,7 +176,7 @@ public class PlayerBackpackManager implements InitializingBean {
                 Inventory inventory = backpack.getInventory();
                 for (int i = newUsableSlots; i < oldUsableSlots; i++) {
                     ItemStack item = inventory.getItem(i);
-                    if (item != null && !Backpack.isPlaceholder(item)) {
+                    if (item != null && !PlaceHolderItem.isPlaceholder(item)) {
                         backpack.getOverflowItems().put(i, ITEM_STACK_SERIALIZER.serialize(item));
                         inventory.clear(i);
                     }
@@ -218,7 +219,7 @@ public class PlayerBackpackManager implements InitializingBean {
         // 序列化可见槽位
         for (int i = 0; i < usableSlots; i++) {
             ItemStack itemStack = inventory.getItem(i);
-            if (itemStack != null && !Backpack.isPlaceholder(itemStack)) {
+            if (itemStack != null && !PlaceHolderItem.isPlaceholder(itemStack)) {
                 jsonObject.addProperty(String.valueOf(i), ITEM_STACK_SERIALIZER.serialize(itemStack));
             }
         }
