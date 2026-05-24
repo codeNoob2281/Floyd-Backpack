@@ -40,7 +40,7 @@ public class Backpack implements InventoryHolder {
     private final String playerName;
 
     @Getter
-    private int size;
+    private final int size = MAX_SIZE;
 
     @Getter
     private int level;
@@ -64,6 +64,16 @@ public class Backpack implements InventoryHolder {
 
     private final String placeholderName;
 
+    private final String nextLevelMaterial;
+
+    private final String nextLevelName;
+
+    /**
+     * 更新下一级可解锁容量（等级变化时调用）
+     */
+    @Setter
+    private int nextLevelUsableSlots;
+
     /**
      * 溢出物品映射（slot → base64），存储因降级而隐藏但未丢失的物品
      */
@@ -71,30 +81,27 @@ public class Backpack implements InventoryHolder {
     private final Map<Integer, String> overflowItems = new LinkedHashMap<>();
 
     public Backpack(@NotNull Player player, int level, int usableSlots,
-                    String placeholderMaterial, String placeholderName) {
+                    String placeholderMaterial, String placeholderName,
+                    String nextLevelMaterial, String nextLevelName, int nextLevelUsableSlots) {
         this(player.getUniqueId().toString(), player.getName(), level, usableSlots,
-                placeholderMaterial, placeholderName);
+                placeholderMaterial, placeholderName,
+                nextLevelMaterial, nextLevelName, nextLevelUsableSlots);
     }
 
     public Backpack(String playerUuid, String playerName, int level, int usableSlots,
-                    String placeholderMaterial, String placeholderName) {
+                    String placeholderMaterial, String placeholderName,
+                    String nextLevelMaterial, String nextLevelName, int nextLevelUsableSlots) {
         usableSlots = fixedUsableSlots(usableSlots);
-        int size = calculateInventorySize(usableSlots);
-        if (size <= 0 || size % 9 != 0) {
-            throw new IllegalArgumentException("illegal size: " + size);
-        }
         this.playerUuid = playerUuid;
         this.playerName = playerName;
         this.level = level;
         this.usableSlots = usableSlots;
-        this.size = size;
         this.cachedLevel = level;
         this.placeholderMaterial = placeholderMaterial;
         this.placeholderName = placeholderName;
-    }
-
-    public static int calculateInventorySize(int usableSlots) {
-        return (int) Math.ceil((double) usableSlots / 9) * 9;
+        this.nextLevelMaterial = nextLevelMaterial;
+        this.nextLevelName = nextLevelName;
+        this.nextLevelUsableSlots = nextLevelUsableSlots;
     }
 
     /**
@@ -104,7 +111,6 @@ public class Backpack implements InventoryHolder {
         newUsableSlots = fixedUsableSlots(newUsableSlots);
         this.level = newLevel;
         this.usableSlots = newUsableSlots;
-        this.size = calculateInventorySize(newUsableSlots);
     }
 
     @Override
@@ -132,7 +138,6 @@ public class Backpack implements InventoryHolder {
 
     private void rebuild(String localeTitle) {
         Inventory oldInv = this.inventory;
-        this.size = calculateInventorySize(usableSlots);
         this.inventory = Bukkit.createInventory(this, this.size, localeTitle);
 
         if (oldInv != null) {
@@ -151,13 +156,20 @@ public class Backpack implements InventoryHolder {
     }
 
     private void reFillPlaceholders() {
+        // 清除可见范围内的过期占位符
         for (int i = 0; i < usableSlots; i++) {
             ItemStack item = this.inventory.getItem(i);
             if (PlaceHolderItem.isPlaceholder(item)) {
                 this.inventory.setItem(i, null);
             }
         }
-        for (int i = usableSlots; i < size; i++) {
+        // 下一级可解锁槽位（绿色）
+        int nextBoundary = Math.min(nextLevelUsableSlots, size);
+        for (int i = usableSlots; i < nextBoundary; i++) {
+            this.inventory.setItem(i, new PlaceHolderItem(nextLevelMaterial, nextLevelName).getItemStack());
+        }
+        // 彻底锁定槽位（灰色）
+        for (int i = nextBoundary; i < size; i++) {
             this.inventory.setItem(i, new PlaceHolderItem(placeholderMaterial, placeholderName).getItemStack());
         }
     }

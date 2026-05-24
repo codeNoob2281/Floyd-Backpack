@@ -27,10 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -69,30 +66,9 @@ public class PlayerBackpackManager implements InitializingBean {
 
     private void loadLevelMapping() {
         Map<Integer, Integer> newMap = new LinkedHashMap<>();
-        try {
-            File configFile = new File(BackpackPluginAccessor.getPlugin().getDataFolder(), "config.yml");
-            if (configFile.exists()) {
-                YamlConfiguration yamlConfig = YamlConfiguration.loadConfiguration(configFile);
-                if (yamlConfig.contains("upgrade.levels")) {
-                    for (String key : yamlConfig.getConfigurationSection("upgrade.levels").getKeys(false)) {
-                        if (key.startsWith("lv")) {
-                            int level = Integer.parseInt(key.substring(2));
-                            int slots = yamlConfig.getInt("upgrade.levels." + key);
-                            newMap.put(level, slots);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Failed to load level mapping from config, using defaults", e);
-        }
-        if (newMap.isEmpty()) {
-            newMap.put(1, 9);
-            newMap.put(2, 18);
-            newMap.put(3, 27);
-            newMap.put(4, 36);
-            newMap.put(5, 45);
-            newMap.put(6, 54);
+        List<Integer> perLevelSlots = pluginSettingsManager.getProperty(UpgradeSettings.LEVELS);
+        for (int i = 0; i < perLevelSlots.size(); i++) {
+            newMap.put(i + 1, perLevelSlots.get(i));
         }
         this.levelSlotMap = newMap;
         logger.info("Level mapping loaded: {}", levelSlotMap);
@@ -103,7 +79,8 @@ public class PlayerBackpackManager implements InitializingBean {
     }
 
     public int getUsableSlots(int level) {
-        return levelSlotMap.getOrDefault(level, level * 9);
+        Integer usableSlots = levelSlotMap.getOrDefault(level, level * 9);
+        return Math.min(pluginSettingsManager.getProperty(UpgradeSettings.MAX_SLOTS), usableSlots);
     }
 
     public @NotNull Backpack getBackpack(Player player) {
@@ -185,6 +162,8 @@ public class PlayerBackpackManager implements InitializingBean {
 
             // 更新等级和容量
             backpack.setUpgrade(newLevel, newUsableSlots);
+            backpack.setNextLevelUsableSlots(
+                    newLevel >= getMaxLevel() ? newUsableSlots : getUsableSlots(newLevel + 1));
 
             if (newUsableSlots > oldUsableSlots) {
                 // 升级：将溢出物品中属于新可用范围的放回 inventory
@@ -259,9 +238,13 @@ public class PlayerBackpackManager implements InitializingBean {
         }
 
         int usableSlots = getUsableSlots(level);
+        int nextLevelUsableSlots = level >= getMaxLevel() ? usableSlots : getUsableSlots(level + 1);
         String placeholderMat = pluginSettingsManager.getProperty(UpgradeSettings.PLACEHOLDER_MATERIAL);
         String placeholderName = pluginSettingsManager.getProperty(UpgradeSettings.PLACEHOLDER_NAME);
-        Backpack backpack = new Backpack(player, level, usableSlots, placeholderMat, placeholderName);
+        String nextLevelMat = pluginSettingsManager.getProperty(UpgradeSettings.PLACEHOLDER_NEXT_LEVEL_MATERIAL);
+        String nextLevelName = pluginSettingsManager.getProperty(UpgradeSettings.PLACEHOLDER_NEXT_LEVEL_NAME);
+        Backpack backpack = new Backpack(player, level, usableSlots,
+                placeholderMat, placeholderName, nextLevelMat, nextLevelName, nextLevelUsableSlots);
 
         // 第二次读取：加载物品数据
         try {
