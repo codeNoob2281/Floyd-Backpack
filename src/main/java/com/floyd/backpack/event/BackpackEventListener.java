@@ -1,6 +1,7 @@
 package com.floyd.backpack.event;
 
 import com.floyd.backpack.command.BackpackSubCmdHandler;
+import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.tools.OpenBackpackTool;
 import com.floyd.core.logging.Logger;
@@ -79,6 +80,24 @@ public class BackpackEventListener implements Listener {
         boolean isMoveAction = (eventAction == InventoryAction.MOVE_TO_OTHER_INVENTORY);
         boolean isHotbarAction = (eventAction == InventoryAction.HOTBAR_SWAP);
         Player player = (Player) event.getWhoClicked();
+
+        // 拦截占位符物品交互
+        if (playerBackpackManager.isBackpackInventory(player, event.getClickedInventory())) {
+            if (Backpack.isPlaceholder(event.getCurrentItem())
+                    || Backpack.isPlaceholder(event.getCursor())) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+        if (isMoveAction || isHotbarAction) {
+            ItemStack targetItem = isMoveAction ? event.getCurrentItem()
+                    : player.getInventory().getItem(event.getHotbarButton());
+            if (Backpack.isPlaceholder(targetItem)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+
         if ((isPlaceAction || isSwitchAction) && playerBackpackManager.isBackpackInventory(player, event.getClickedInventory())) {
             // 不允许将tool放入到背包中
             if (OpenBackpackTool.matchItemStack(event.getCursor())) {
@@ -105,6 +124,18 @@ public class BackpackEventListener implements Listener {
             boolean matchTools = event.getNewItems().values().stream()
                     .anyMatch(OpenBackpackTool::matchItemStack);
             if (matchTools) {
+                event.setCancelled(true);
+                return;
+            }
+            // 不允许拖拽涉及占位符物品
+            boolean involvesPlaceholder = event.getNewItems().values().stream()
+                    .anyMatch(Backpack::isPlaceholder)
+                    || event.getInventory().getStorageContents().length > 0
+                    && event.getNewItems().keySet().stream().anyMatch(slot -> {
+                        ItemStack existing = event.getInventory().getItem(slot);
+                        return Backpack.isPlaceholder(existing);
+                    });
+            if (involvesPlaceholder) {
                 event.setCancelled(true);
             }
         }

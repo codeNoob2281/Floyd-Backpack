@@ -26,6 +26,18 @@ command:
       tip-confirm: "§6Type §c/bp clear confirm §6to confirm."
       tip-cancel: "§6Type §c/bp clear cancel §6to cancel."
       operation-expired: "§e[Floyd-Backpack] §6Previous operation has expired."
+    upgrade:
+      success: "§aBackpack upgraded to Lv{0}! Capacity: {1} slots."
+      max-level: "§cYour backpack is already at max level (Lv{0})."
+      no-permission: "§cNo permission to upgrade backpack."
+      disabled: "§cBackpack upgrade is disabled on this server."
+      status: "§6Backpack: Lv{0} | §b{1}/{2} slots used."
+    setlevel:
+      success: "§aSet {0}'s backpack to Lv{1} ({2} slots)."
+      sender-only: "§cThis command can only be executed by a player."
+      player-not-found: "§cPlayer not found: {0}."
+      invalid-level: "§cInvalid level. Must be between 1 and {0}."
+      usage: "§cUsage: /bp setlevel <player> <level>"
 chest-ui:
   backpack-title: "§6{0}''s backpack"
 backpack-tool:

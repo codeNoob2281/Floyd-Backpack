@@ -66,6 +66,9 @@ public class FloydBackpackPlugin extends FloydPlugin {
             // 重新加载配置
             SettingsReloadManager settingsReloadManager = applicationContext.getBean(SettingsReloadManager.class);
             settingsReloadManager.reload();
+            // 重载等级映射
+            PlayerBackpackManager playerBackpackManager = applicationContext.getBean(PlayerBackpackManager.class);
+            playerBackpackManager.reloadLevelMapping();
             // 重载定时任务
             ConfirmOperationManager confirmOperationManager = applicationContext.getBean(ConfirmOperationManager.class);
             confirmOperationManager.reload();

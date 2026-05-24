@@ -20,9 +20,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author floyd
@@ -136,10 +134,16 @@ public class BackpackClearCmdHandler extends AbstractCmdHandler {
         Player player = (Player) sender;
         Backpack backpack = playerBackpackManager.getBackpack(player);
         Inventory inventory = backpack.getInventory();
-        long clearItemCount = Arrays.stream(inventory.getStorageContents())
-                .filter(Objects::nonNull).count();
-        inventory.clear();
-        return (int) clearItemCount;
+        int usableSlots = backpack.getUsableSlots();
+        int clearItemCount = 0;
+        for (int i = 0; i < usableSlots; i++) {
+            ItemStack item = inventory.getItem(i);
+            if (item != null) {
+                inventory.clear(i);
+                clearItemCount++;
+            }
+        }
+        return clearItemCount;
     }
 
 }

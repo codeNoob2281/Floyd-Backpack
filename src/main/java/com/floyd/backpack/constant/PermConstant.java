@@ -35,4 +35,14 @@ public class PermConstant {
      */
     public static final String SHOW_VERSION = PREFIX + "version";
 
+    /**
+     * 背包升级权限
+     */
+    public static final String UPGRADE_BACKPACK = PREFIX + "upgrade";
+
+    /**
+     * 管理员权限（setlevel 等）
+     */
+    public static final String ADMIN_BACKPACK = PREFIX + "admin";
+
 }

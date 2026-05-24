@@ -2,19 +2,24 @@ package com.floyd.backpack.service;
 
 import com.floyd.backpack.BackpackPluginAccessor;
 import com.floyd.backpack.entity.Backpack;
+import com.floyd.backpack.setting.properties.UpgradeSettings;
 import com.floyd.core.inventory.io.BukkitItemStackSerializer;
 import com.floyd.core.inventory.io.ItemStackSerializer;
 import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
+import com.floyd.core.settings.PluginSettingsManager;
 import com.floyd.core.util.DateUtil;
 import com.floyd.core.util.FileUtil;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -23,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,7 +39,7 @@ import java.util.concurrent.locks.Lock;
  * @date 2026/3/23
  */
 @Component
-public class PlayerBackpackManager {
+public class PlayerBackpackManager implements InitializingBean {
 
     public static final int INITIAL_BACKPACK_MAP_CAPACITY = 32;
 
@@ -42,6 +48,62 @@ public class PlayerBackpackManager {
     private final Map<String, Backpack> PLAYER_BACKPACK_MAP = new ConcurrentHashMap<>(INITIAL_BACKPACK_MAP_CAPACITY);
 
     private final ItemStackSerializer ITEM_STACK_SERIALIZER = new BukkitItemStackSerializer();
+
+    @Autowired
+    private PluginSettingsManager pluginSettingsManager;
+
+    private Map<Integer, Integer> levelSlotMap = new LinkedHashMap<>();
+
+    @Override
+    public void afterPropertiesSet() {
+        loadLevelMapping();
+    }
+
+    /**
+     * 重新加载等级→容量映射（/bp reload 时调用）
+     */
+    public void reloadLevelMapping() {
+        loadLevelMapping();
+    }
+
+    private void loadLevelMapping() {
+        Map<Integer, Integer> newMap = new LinkedHashMap<>();
+        try {
+            File configFile = new File(BackpackPluginAccessor.getPlugin().getDataFolder(), "config.yml");
+            if (configFile.exists()) {
+                YamlConfiguration yamlConfig = YamlConfiguration.loadConfiguration(configFile);
+                if (yamlConfig.contains("upgrade.levels")) {
+                    for (String key : yamlConfig.getConfigurationSection("upgrade.levels").getKeys(false)) {
+                        if (key.startsWith("lv")) {
+                            int level = Integer.parseInt(key.substring(2));
+                            int slots = yamlConfig.getInt("upgrade.levels." + key);
+                            newMap.put(level, slots);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Failed to load level mapping from config, using defaults", e);
+        }
+        if (newMap.isEmpty()) {
+            newMap.put(1, 9);
+            newMap.put(2, 18);
+            newMap.put(3, 27);
+            newMap.put(4, 36);
+            newMap.put(5, 45);
+            newMap.put(6, 54);
+        }
+        this.levelSlotMap = newMap;
+        logger.info("Level mapping loaded: {}", levelSlotMap);
+    }
+
+    public int getMaxLevel() {
+        return pluginSettingsManager.getProperty(UpgradeSettings.MAX_LEVEL);
+    }
+
+    public int getUsableSlots(int level) {
+        return levelSlotMap.getOrDefault(level, level * 9);
+    }
 
     public @NotNull Backpack getBackpack(Player player) {
         return PLAYER_BACKPACK_MAP.computeIfAbsent(getUuid(player), uuid -> createBackpack(player));
@@ -70,13 +132,6 @@ public class PlayerBackpackManager {
         logger.info("All player backpack data saved, success: {}, failed: {}", successCount.get(), failCount.get());
     }
 
-    /**
-     *
-     * 将玩家的背包数据保存到文件，并从内存中移除
-     *
-     * @param player 玩家
-     * @return 保存结果
-     */
     public boolean flushBackpackToFile(Player player) {
         String uuid = getUuid(player);
         Backpack backpack = PLAYER_BACKPACK_MAP.get(uuid);
@@ -104,18 +159,74 @@ public class PlayerBackpackManager {
         return backpack != null && backpack.getInventory() == clickedInventory;
     }
 
+    /**
+     * 设置背包等级（同时处理升级和降级）
+     */
+    public void setBackpackLevel(Backpack backpack, int newLevel, int newUsableSlots) {
+        Lock lock = backpack.getLock();
+        lock.lock();
+        try {
+            writeBackpackDataToFile(backpack);
+
+            int oldUsableSlots = backpack.getUsableSlots();
+
+            if (newUsableSlots < oldUsableSlots) {
+                // 降级：将超出新容量的物品移至溢出映射
+                Inventory inventory = backpack.getInventory();
+                for (int i = newUsableSlots; i < oldUsableSlots; i++) {
+                    ItemStack item = inventory.getItem(i);
+                    if (item != null && !Backpack.isPlaceholder(item)) {
+                        backpack.getOverflowItems().put(i, ITEM_STACK_SERIALIZER.serialize(item));
+                        inventory.clear(i);
+                    }
+                }
+            }
+
+            // 更新等级和容量
+            backpack.setUpgrade(newLevel, newUsableSlots);
+
+            if (newUsableSlots > oldUsableSlots) {
+                // 升级：将溢出物品中属于新可用范围的放回 inventory
+                Inventory inventory = backpack.getInventory();
+                Map<Integer, String> overflow = backpack.getOverflowItems();
+                overflow.entrySet().removeIf(entry -> {
+                    if (entry.getKey() < newUsableSlots) {
+                        ItemStack item = ITEM_STACK_SERIALIZER.deserialize(entry.getValue());
+                        if (item != null) {
+                            inventory.setItem(entry.getKey(), item);
+                        }
+                        return true;
+                    }
+                    return false;
+                });
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
     private boolean writeBackpackDataToFile(Backpack backpack) {
         if (backpack == null) {
             return false;
         }
         JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("_level", backpack.getLevel());
+
         Inventory inventory = backpack.getInventory();
-        for (int i = 0; i < inventory.getSize(); i++) {
+        int usableSlots = backpack.getUsableSlots();
+
+        // 序列化可见槽位
+        for (int i = 0; i < usableSlots; i++) {
             ItemStack itemStack = inventory.getItem(i);
-            if (itemStack != null) {
+            if (itemStack != null && !Backpack.isPlaceholder(itemStack)) {
                 jsonObject.addProperty(String.valueOf(i), ITEM_STACK_SERIALIZER.serialize(itemStack));
             }
         }
+
+        // 保留溢出物品（隐藏但未丢失的物品）
+        backpack.getOverflowItems().forEach((slot, base64) ->
+                jsonObject.addProperty(String.valueOf(slot), base64));
+
         File dataFile = getBackpackDataFile(backpack.getPlayerUuid());
         try {
             FileUtil.writeString(dataFile, jsonObject.toString(), StandardCharsets.UTF_8);
@@ -127,38 +238,76 @@ public class PlayerBackpackManager {
     }
 
     private Backpack createBackpack(Player player) {
-        Backpack backpack = new Backpack(player);
-        // 读取持久化的背包物品数据
+        int level = 1;
         File backpackDataFile = getBackpackDataFile(getUuid(player));
+
+        // 首次读取：从 JSON 获取 _level
+        if (backpackDataFile.exists()) {
+            try {
+                String json = FileUtil.readString(backpackDataFile, StandardCharsets.UTF_8);
+                JsonElement jsonElement = JsonParser.parseString(json);
+                if (jsonElement.isJsonObject()) {
+                    JsonElement levelElem = jsonElement.getAsJsonObject().get("_level");
+                    if (levelElem != null && levelElem.isJsonPrimitive()) {
+                        level = levelElem.getAsInt();
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to read level from backpack data for player [{}], using default level 1", player.getName());
+            }
+        }
+
+        int usableSlots = getUsableSlots(level);
+        String placeholderMat = pluginSettingsManager.getProperty(UpgradeSettings.PLACEHOLDER_MATERIAL);
+        String placeholderName = pluginSettingsManager.getProperty(UpgradeSettings.PLACEHOLDER_NAME);
+        Backpack backpack = new Backpack(player, level, usableSlots, placeholderMat, placeholderName);
+
+        // 第二次读取：加载物品数据
         try {
             if (backpackDataFile.exists()) {
-                JsonElement jsonElement = JsonParser.parseString(FileUtil.readString(backpackDataFile, StandardCharsets.UTF_8));
+                String json = FileUtil.readString(backpackDataFile, StandardCharsets.UTF_8);
+                JsonElement jsonElement = JsonParser.parseString(json);
                 if (jsonElement.isJsonObject()) {
                     JsonObject jsonObj = jsonElement.getAsJsonObject();
-                    Map<Integer, ItemStack> itemStackMap = new HashMap<>(jsonObj.size());
-                    jsonObj.entrySet().forEach(entry -> {
-                        itemStackMap.put(Integer.parseInt(entry.getKey()), ITEM_STACK_SERIALIZER.deserialize(entry.getValue().getAsString()));
-                    });
-                    itemStackMap.forEach(backpack.getInventory()::setItem);
+                    Map<Integer, ItemStack> loadedItems = new HashMap<>();
+                    Map<Integer, String> overflowItems = new LinkedHashMap<>();
+
+                    for (Map.Entry<String, JsonElement> entry : jsonObj.entrySet()) {
+                        String key = entry.getKey();
+                        if ("_level".equals(key)) {
+                            continue;
+                        }
+                        try {
+                            int slot = Integer.parseInt(key);
+                            String base64 = entry.getValue().getAsString();
+                            if (slot < usableSlots) {
+                                loadedItems.put(slot, ITEM_STACK_SERIALIZER.deserialize(base64));
+                            } else {
+                                overflowItems.put(slot, base64);
+                            }
+                        } catch (NumberFormatException e) {
+                            logger.warn("Invalid slot key in backpack data for player [{}]: {}", player.getName(), key);
+                        }
+                    }
+
+                    loadedItems.forEach(backpack.getInventory()::setItem);
+                    backpack.getOverflowItems().putAll(overflowItems);
                 }
             } else {
-                boolean res = backpackDataFile.createNewFile();
-                if (!res) {
+                if (!backpackDataFile.createNewFile()) {
                     logger.warn("Failed to create backpack data file for player [{}], please check file permissions", player.getName());
                 }
             }
         } catch (Exception e) {
             logger.error("Failed to load backpack data for player [{}]", player.getName(), e);
-            if (e instanceof IOException) {
-                return backpack;
-            }
-            // 非io异常，备份损坏的文件
-            File backupFile = new File(backpackDataFile.getAbsolutePath() + ".bak." + DateUtil.format(new Date(), DateUtil.PURE_DATE_TIME_FORMAT));
-            try {
-                logger.warn("Backpack data for player [{}] is corrupted, created a new backpack. Backup file location: {}", player.getName(), backupFile.getAbsolutePath());
-                Files.copy(backpackDataFile.toPath(), backupFile.toPath());
-            } catch (IOException ioe) {
-                logger.error("Failed to backup backpack data for player [{}]", player.getName(), ioe);
+            if (!(e instanceof IOException)) {
+                File backupFile = new File(backpackDataFile.getAbsolutePath() + ".bak." + DateUtil.format(new Date(), DateUtil.PURE_DATE_TIME_FORMAT));
+                try {
+                    logger.warn("Backpack data for player [{}] is corrupted, created a new backpack. Backup file location: {}", player.getName(), backupFile.getAbsolutePath());
+                    Files.copy(backpackDataFile.toPath(), backupFile.toPath());
+                } catch (IOException ioe) {
+                    logger.error("Failed to backup backpack data for player [{}]", player.getName(), ioe);
+                }
             }
         }
         return backpack;

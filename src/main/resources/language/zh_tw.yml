@@ -26,6 +26,18 @@ command:
       tip-confirm: "§6輸入 §c/bp clear confirm §6確認"
       tip-cancel: "§6輸入 §c/bp clear cancel §6取消"
       operation-expired: "§e[Floyd-Backpack] §6上一個操作已過期"
+    upgrade:
+      success: "§a背包已升級至 Lv{0}！容量: {1} 格。"
+      max-level: "§c背包已達最大等級 (Lv{0})。"
+      no-permission: "§c無背包升級權限。"
+      disabled: "§c本伺服器已禁用背包升級。"
+      status: "§6背包: Lv{0} | §b已用 {1}/{2} 格。"
+    setlevel:
+      success: "§a已將 {0} 的背包設為 Lv{1} ({2} 格)。"
+      sender-only: "§c該命令只能由玩家執行。"
+      player-not-found: "§c未找到玩家: {0}。"
+      invalid-level: "§c無效等級。必須介於 1 和 {0} 之間。"
+      usage: "§c用法: /bp setlevel <玩家> <等級>"
 chest-ui:
   backpack-title: "§6{0}的背包"
 backpack-tool:
