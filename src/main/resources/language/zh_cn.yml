@@ -40,6 +40,9 @@ command:
       usage: "§c用法: /bp setlevel <玩家> <等级>"
 chest-ui:
   backpack-title: "§6{0}的背包"
+  placeholder:
+    next-level-slot-name: "§a下一级解锁"
+    locked-slot-name: "§7未解锁"
 backpack-tool:
   item-name: "§b[Floyd-Backpack]§6 右键打开背包"
   lore-line1: "§a§l手持该物品，右键打开背包"

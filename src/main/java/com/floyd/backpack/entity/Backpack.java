@@ -60,13 +60,13 @@ public class Backpack implements InventoryHolder {
 
     private int cachedLevel;
 
-    private final String placeholderMaterial;
+    private String placeholderName;
 
-    private final String placeholderName;
+    private final String placeholderMaterial;
 
     private final String nextLevelMaterial;
 
-    private final String nextLevelName;
+    private String nextLevelName;
 
     /**
      * 更新下一级可解锁容量（等级变化时调用）
@@ -121,22 +121,28 @@ public class Backpack implements InventoryHolder {
 
     private void rebuildIfNeeded() {
         String localeTitle = ChestUIMsg.BACKPACK_TITLE.content(playerName);
+        String currentPlaceholderName = ChestUIMsg.PLACEHOLDER_LOCKED_SLOT_NAME.content();
+        String currentNextLevelName = ChestUIMsg.PLACEHOLDER_NEXT_LEVEL_SLOT_NAME.content();
         boolean levelChanged = this.level != this.cachedLevel;
         boolean titleChanged = !localeTitle.equals(title);
+        boolean placeholderChanged = !currentPlaceholderName.equals(this.placeholderName)
+                || !currentNextLevelName.equals(this.nextLevelName);
 
-        if (inventory != null && !titleChanged && !levelChanged) {
+        if (inventory != null && !titleChanged && !levelChanged && !placeholderChanged) {
             return;
         }
 
         synchronized (this) {
-            if (inventory != null && localeTitle.equals(title) && this.level == this.cachedLevel) {
+            if (inventory != null && localeTitle.equals(title) && this.level == this.cachedLevel
+                    && currentPlaceholderName.equals(this.placeholderName)
+                    && currentNextLevelName.equals(this.nextLevelName)) {
                 return;
             }
-            rebuild(localeTitle);
+            rebuild(localeTitle, currentPlaceholderName, currentNextLevelName);
         }
     }
 
-    private void rebuild(String localeTitle) {
+    private void rebuild(String localeTitle, String currentPlaceholderName, String currentNextLevelName) {
         Inventory oldInv = this.inventory;
         this.inventory = Bukkit.createInventory(this, this.size, localeTitle);
 
@@ -150,6 +156,8 @@ public class Backpack implements InventoryHolder {
             }
         }
 
+        this.placeholderName = currentPlaceholderName;
+        this.nextLevelName = currentNextLevelName;
         reFillPlaceholders();
         this.title = localeTitle;
         this.cachedLevel = this.level;

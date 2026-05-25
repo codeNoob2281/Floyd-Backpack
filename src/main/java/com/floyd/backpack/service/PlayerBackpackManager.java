@@ -3,6 +3,7 @@ package com.floyd.backpack.service;
 import com.floyd.backpack.BackpackPluginAccessor;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.entity.PlaceHolderItem;
+import com.floyd.backpack.message.ChestUIMsg;
 import com.floyd.backpack.setting.properties.UpgradeSettings;
 import com.floyd.core.inventory.io.BukkitItemStackSerializer;
 import com.floyd.core.inventory.io.ItemStackSerializer;
@@ -240,9 +241,9 @@ public class PlayerBackpackManager implements InitializingBean {
         int usableSlots = getUsableSlots(level);
         int nextLevelUsableSlots = level >= getMaxLevel() ? usableSlots : getUsableSlots(level + 1);
         String placeholderMat = pluginSettingsManager.getProperty(UpgradeSettings.PLACEHOLDER_MATERIAL);
-        String placeholderName = pluginSettingsManager.getProperty(UpgradeSettings.PLACEHOLDER_NAME);
+        String placeholderName = ChestUIMsg.PLACEHOLDER_LOCKED_SLOT_NAME.content();
         String nextLevelMat = pluginSettingsManager.getProperty(UpgradeSettings.PLACEHOLDER_NEXT_LEVEL_MATERIAL);
-        String nextLevelName = pluginSettingsManager.getProperty(UpgradeSettings.PLACEHOLDER_NEXT_LEVEL_NAME);
+        String nextLevelName = ChestUIMsg.PLACEHOLDER_NEXT_LEVEL_SLOT_NAME.content();
         Backpack backpack = new Backpack(player, level, usableSlots,
                 placeholderMat, placeholderName, nextLevelMat, nextLevelName, nextLevelUsableSlots);
 

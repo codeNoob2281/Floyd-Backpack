@@ -30,6 +30,4 @@ upgrade:
     - 54
   placeholder-item:
     material: GRAY_STAINED_GLASS_PANE
-    name: "§7Unlocked"
     next-level-material: LIME_STAINED_GLASS_PANE
-    next-level-name: "§aNext Level Unlock"
