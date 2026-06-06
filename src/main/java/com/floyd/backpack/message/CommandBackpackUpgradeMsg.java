@@ -34,7 +34,4 @@ public class CommandBackpackUpgradeMsg implements I18nMessageHolder {
     public static final LocaleMessage SETLEVEL_INVALID_LEVEL =
             LocaleMessage.of("command.backpack.setlevel.invalid-level", "§cInvalid level. Must be between 1 and {0}.");
 
-    public static final LocaleMessage SETLEVEL_USAGE =
-            LocaleMessage.of("command.backpack.setlevel.usage", "§cUsage: /bp setlevel <player> <level>");
-
 }

@@ -33,16 +33,28 @@ command:
       disabled: "§cBackpack upgrade is disabled on this server."
       status: "§6Backpack: Lv{0} | §b{1}/{2} slots used."
     setlevel:
-      success: "§aSet {0}'s backpack to Lv{1} ({2} slots)."
+      success: "§aSet {0}''s backpack to Lv{1} ({2} slots)."
       sender-only: "§cThis command can only be executed by a player."
       player-not-found: "§cPlayer not found: {0}."
       invalid-level: "§cInvalid level. Must be between 1 and {0}."
-      usage: "§cUsage: /bp setlevel <player> <level>"
 chest-ui:
   backpack-title: "§6{0}''s backpack"
   placeholder:
     next-level-slot-name: "§aNext Level Unlock"
+    next-level-slot-lore: "§eRight-click to upgrade"
     locked-slot-name: "§7Unlocked"
+  upgrade-confirm:
+    title: "§6Upgrade Confirmation"
+    current-lv: "§eCurrent: Lv{0}"
+    current-lv-lore: "§7{0} slots"
+    arrow: "§7→"
+    next-lv: "§aNext: Lv{0}"
+    next-lv-lore: "§7{0} slots"
+    cost-title: "§eCost"
+    cost-placeholder: "§7Coming soon..."
+    confirm: "§a✔ Confirm"
+    cancel: "§c✘ Cancel"
+    success: "§aBackpack upgraded to Lv{0}! Capacity: {1} slots."
 backpack-tool:
   item-name: "§b[Floyd-Backpack]§6 Right-click to open backpack"
   lore-line1: "§aHold this item and right-click to open backpack"

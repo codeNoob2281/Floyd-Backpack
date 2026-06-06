@@ -50,7 +50,7 @@ public class BackpackSubCmdHandler extends AbstractCmdHandler {
     }
 
     @SubCommandMapping(commands = "reload", permission = PermConstant.RELOAD_CONFIG)
-    public void onReloadCmd(@NotNull CommandSender sender, @NotNull String @NotNull [] args) {
+    public void onReloadCmd(@NotNull CommandSender sender) {
         sender.sendMessage(CommandBackpackMsg.RELOAD_START.content());
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -64,7 +64,7 @@ public class BackpackSubCmdHandler extends AbstractCmdHandler {
     }
 
     @SubCommandMapping(commands = "help", permission = PermConstant.SHOW_HELP)
-    public void onShowHelpCmd(@NotNull CommandSender sender, @NotNull String @NotNull [] args) {
+    public void onShowHelpCmd(@NotNull CommandSender sender) {
         sender.sendMessage(CommandBackpackHelpMsg.TITLE.content());
         sender.sendMessage(CommandBackpackHelpMsg.COMMANDS_HEADER.content());
         sender.sendMessage(CommandBackpackHelpMsg.CMD_OPEN_DESC.content());
@@ -82,8 +82,8 @@ public class BackpackSubCmdHandler extends AbstractCmdHandler {
     }
 
     @SubCommandMapping(isFallback = true)
-    public boolean onErrorCmd(@NotNull CommandSender sender, @NotNull String @NotNull [] args) {
-        onShowHelpCmd(sender, args);
+    public boolean onErrorCmd(@NotNull CommandSender sender) {
+        onShowHelpCmd(sender);
         return false;
     }
 

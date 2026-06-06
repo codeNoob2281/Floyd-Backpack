@@ -8,6 +8,7 @@ import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.setting.properties.UpgradeSettings;
 import com.floyd.core.command.SubCommandHandler;
 import com.floyd.core.command.SubCommandMapping;
+import com.floyd.core.command.SubCommandParam;
 import com.floyd.core.settings.PluginSettingsManager;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
@@ -73,21 +74,9 @@ public class BackpackUpgradeCmdHandler extends AbstractCmdHandler {
     }
 
     @SubCommandMapping(commands = "set-level", permission = PermConstant.ADMIN_BACKPACK)
-    public void onSetLevelCmd(@NotNull CommandSender sender, @NotNull String @NotNull [] args) {
-        if (args.length < 2) {
-            sender.sendMessage(CommandBackpackUpgradeMsg.SETLEVEL_USAGE.content());
-            return;
-        }
-
-        String targetName = args[0];
-        int targetLevel;
-        try {
-            targetLevel = Integer.parseInt(args[1]);
-        } catch (NumberFormatException e) {
-            sender.sendMessage(CommandBackpackUpgradeMsg.SETLEVEL_USAGE.content());
-            return;
-        }
-
+    public void onSetLevelCmd(@NotNull CommandSender sender,
+                              @SubCommandParam(index = 0, description = "target player") String targetName,
+                              @SubCommandParam(index = 1, description = "target level") Integer targetLevel) {
         int maxLevel = playerBackpackManager.getMaxLevel();
         if (targetLevel < 1 || targetLevel > maxLevel) {
             sender.sendMessage(CommandBackpackUpgradeMsg.SETLEVEL_INVALID_LEVEL.content(maxLevel));

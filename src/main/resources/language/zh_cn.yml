@@ -37,12 +37,24 @@ command:
       sender-only: "§c该命令只能由玩家执行。"
       player-not-found: "§c未找到玩家: {0}。"
       invalid-level: "§c无效等级。必须介于 1 和 {0} 之间。"
-      usage: "§c用法: /bp setlevel <玩家> <等级>"
 chest-ui:
   backpack-title: "§6{0}的背包"
   placeholder:
     next-level-slot-name: "§a下一级解锁"
+    next-level-slot-lore: "§e右键进行升级"
     locked-slot-name: "§7未解锁"
+  upgrade-confirm:
+    title: "§6升级确认"
+    current-lv: "§e当前: Lv{0}"
+    current-lv-lore: "§7{0} 格"
+    arrow: "§7→"
+    next-lv: "§a升级后: Lv{0}"
+    next-lv-lore: "§7{0} 格"
+    cost-title: "§e消耗"
+    cost-placeholder: "§7暂未开放..."
+    confirm: "§a✔ 确认升级"
+    cancel: "§c✘ 取消"
+    success: "§a背包已升级至 Lv{0}！容量: {1} 格。"
 backpack-tool:
   item-name: "§b[Floyd-Backpack]§6 右键打开背包"
   lore-line1: "§a§l手持该物品，右键打开背包"
