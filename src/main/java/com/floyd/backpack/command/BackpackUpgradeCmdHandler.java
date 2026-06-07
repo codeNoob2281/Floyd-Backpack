@@ -1,5 +1,6 @@
 package com.floyd.backpack.command;
 
+import com.floyd.backpack.command.completer.NamedParameterCompleter;
 import com.floyd.backpack.constant.PermConstant;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.message.CommandBackpackMsg;
@@ -8,7 +9,8 @@ import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.setting.properties.UpgradeSettings;
 import com.floyd.core.command.SubCommandHandler;
 import com.floyd.core.command.SubCommandMapping;
-import com.floyd.core.command.SubCommandParam;
+import com.floyd.core.command.param.ParameterCompleterFactory;
+import com.floyd.core.command.param.SubCommandParam;
 import com.floyd.core.settings.PluginSettingsManager;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
@@ -75,17 +77,13 @@ public class BackpackUpgradeCmdHandler extends AbstractCmdHandler {
 
     @SubCommandMapping(commands = "set-level", permission = PermConstant.ADMIN_BACKPACK)
     public void onSetLevelCmd(@NotNull CommandSender sender,
-                              @SubCommandParam(index = 0, description = "target player") String targetName,
-                              @SubCommandParam(index = 1, description = "target level") Integer targetLevel) {
+                              @SubCommandParam(index = 0, description = "target player",
+                                      completer = ParameterCompleterFactory.ONLINE_PLAYERS) Player targetPlayer,
+                              @SubCommandParam(index = 1, description = "target level",
+                                      completer = NamedParameterCompleter.BACKPACK_LEVEL) Integer targetLevel) {
         int maxLevel = playerBackpackManager.getMaxLevel();
         if (targetLevel < 1 || targetLevel > maxLevel) {
             sender.sendMessage(CommandBackpackUpgradeMsg.SETLEVEL_INVALID_LEVEL.content(maxLevel));
-            return;
-        }
-
-        Player targetPlayer = Bukkit.getPlayer(targetName);
-        if (targetPlayer == null) {
-            sender.sendMessage(CommandBackpackUpgradeMsg.SETLEVEL_PLAYER_NOT_FOUND.content(targetName));
             return;
         }
 
