@@ -13,7 +13,6 @@ import com.floyd.core.command.param.ParameterCompleterFactory;
 import com.floyd.core.command.param.SubCommandParam;
 import com.floyd.core.settings.PluginSettingsManager;
 import net.kyori.adventure.sound.Sound;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -82,7 +81,11 @@ public class BackpackUpgradeCmdHandler extends AbstractCmdHandler {
                               @SubCommandParam(index = 1, description = "target level",
                                       completer = NamedParameterCompleter.BACKPACK_LEVEL) Integer targetLevel) {
         int maxLevel = playerBackpackManager.getMaxLevel();
-        if (targetLevel < 1 || targetLevel > maxLevel) {
+        if (targetPlayer == null) {
+            sender.sendMessage(CommandBackpackUpgradeMsg.SETLEVEL_PLAYER_NOT_FOUND.content("Unknown"));
+            return;
+        }
+        if (targetLevel == null || targetLevel < 1 || targetLevel > maxLevel) {
             sender.sendMessage(CommandBackpackUpgradeMsg.SETLEVEL_INVALID_LEVEL.content(maxLevel));
             return;
         }

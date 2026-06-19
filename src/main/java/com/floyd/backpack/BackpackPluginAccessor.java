@@ -1,9 +1,6 @@
 package com.floyd.backpack;
 
-import com.floyd.core.i18n.I18nMessageProvider;
-
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * 背包插件Accessor

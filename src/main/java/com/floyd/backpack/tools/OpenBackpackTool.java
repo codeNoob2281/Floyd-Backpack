@@ -3,7 +3,6 @@ package com.floyd.backpack.tools;
 import com.floyd.backpack.message.BackpackToolMsg;
 import com.floyd.backpack.ui.ChestButton;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;

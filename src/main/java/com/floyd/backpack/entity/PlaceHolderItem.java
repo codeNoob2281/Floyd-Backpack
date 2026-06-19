@@ -31,7 +31,7 @@ public class PlaceHolderItem extends ChestButton {
     public PlaceHolderItem(String materialName, String displayName, boolean isNextLevel, String lore) {
         Material material = Material.getMaterial(materialName);
         if (material == null) {
-            throw new IllegalArgumentException("Invalid placeholder material: " + materialName);
+            material = isNextLevel ? Material.LIME_STAINED_GLASS_PANE : Material.GRAY_STAINED_GLASS_PANE;
         }
         ItemStack placeholder = new ItemStack(material);
         ItemMeta meta = placeholder.getItemMeta();

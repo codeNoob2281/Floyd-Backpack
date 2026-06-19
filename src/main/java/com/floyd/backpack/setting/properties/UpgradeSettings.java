@@ -1,8 +1,10 @@
 package com.floyd.backpack.setting.properties;
 
 import ch.jalu.configme.Comment;
-import ch.jalu.configme.SettingsHolder;
-import ch.jalu.configme.properties.*;
+import ch.jalu.configme.properties.BooleanProperty;
+import ch.jalu.configme.properties.IntegerProperty;
+import ch.jalu.configme.properties.ListProperty;
+import ch.jalu.configme.properties.StringProperty;
 import ch.jalu.configme.properties.types.PrimitivePropertyType;
 import com.floyd.core.settings.PluginSettingsHolder;
 import org.jetbrains.annotations.NotNull;

@@ -1,12 +1,10 @@
 package com.floyd.backpack.setting.properties;
 
 import ch.jalu.configme.Comment;
-import ch.jalu.configme.SettingsHolder;
 import ch.jalu.configme.properties.BooleanProperty;
 import ch.jalu.configme.properties.LongProperty;
 import com.floyd.backpack.constant.Constants;
 import com.floyd.core.settings.PluginSettingsHolder;
-import com.floyd.core.settings.PluginSettingsManager;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 

@@ -8,8 +8,8 @@ import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.setting.properties.UpgradeSettings;
 import com.floyd.backpack.tools.OpenBackpackTool;
 import com.floyd.backpack.ui.BackpackUpgradeConfirmGui;
-import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
+import com.floyd.core.logging.Logger;
 import com.floyd.core.settings.PluginSettingsManager;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.entity.Player;
@@ -177,6 +177,9 @@ public class BackpackEventListener implements Listener {
                     .anyMatch(PlaceHolderItem::isPlaceholder)
                     || event.getInventory().getStorageContents().length > 0
                     && event.getNewItems().keySet().stream().anyMatch(slot -> {
+                if (slot < 0 || slot >= event.getInventory().getSize()) {
+                    return false;
+                }
                 ItemStack existing = event.getInventory().getItem(slot);
                 return PlaceHolderItem.isPlaceholder(existing);
             });

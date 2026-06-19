@@ -1,7 +1,6 @@
 package com.floyd.backpack.command;
 
 import com.floyd.backpack.BackpackPluginAccessor;
-import com.floyd.backpack.constant.Constants;
 import com.floyd.backpack.constant.PermConstant;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.message.CommandBackpackHelpMsg;
@@ -9,11 +8,9 @@ import com.floyd.backpack.message.CommandBackpackMsg;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.core.command.SubCommandHandler;
 import com.floyd.core.command.SubCommandMapping;
-import com.floyd.core.i18n.I18nMessageProvider;
-import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
+import com.floyd.core.logging.Logger;
 import io.papermc.paper.plugin.configuration.PluginMeta;
-import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

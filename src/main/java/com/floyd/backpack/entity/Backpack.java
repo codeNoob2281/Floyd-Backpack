@@ -5,14 +5,12 @@ import com.floyd.core.logging.ConsoleLoggerFactory;
 import com.floyd.core.logging.Logger;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.util.Assert;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -21,7 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author floyd
- * @date 2026/3/23
+ * @since 2026/3/23
  */
 public class Backpack implements InventoryHolder {
 
@@ -122,6 +120,11 @@ public class Backpack implements InventoryHolder {
     }
 
     private void rebuildIfNeeded() {
+        if (inventory != null && !inventory.getViewers().isEmpty()) {
+            //如果仍有玩家正在查看，则暂不重建，等玩家关闭背包后再在下一次打开时重建。
+            return;
+        }
+
         String localeTitle = ChestUIMsg.BACKPACK_TITLE.content(playerName);
         String currentPlaceholderName = ChestUIMsg.PLACEHOLDER_LOCKED_SLOT_NAME.content();
         String currentNextLevelName = ChestUIMsg.PLACEHOLDER_NEXT_LEVEL_SLOT_NAME.content();

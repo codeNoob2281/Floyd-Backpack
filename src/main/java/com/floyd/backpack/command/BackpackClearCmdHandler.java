@@ -10,17 +10,14 @@ import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.setting.properties.CmdClearBackPackSettings;
 import com.floyd.core.command.SubCommandHandler;
 import com.floyd.core.command.SubCommandMapping;
-import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
+import com.floyd.core.logging.Logger;
 import com.floyd.core.settings.PluginSettingsManager;
-import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 /**
  * @author floyd
