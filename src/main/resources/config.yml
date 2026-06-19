@@ -13,3 +13,21 @@ command:
 i18n:
   # Locale to use for internationalization
   locale: en
+upgrade:
+  # Whether backpack upgrade is enabled
+  enabled: true
+  # Maximum backpack level
+  max-level: 6
+  # Maximum slots
+  max-slots: 54
+  # The number of backpack slots corresponding to each level, with index 0 representing level 1
+  levels:
+    - 9
+    - 18
+    - 27
+    - 36
+    - 45
+    - 54
+  placeholder-item:
+    material: GRAY_STAINED_GLASS_PANE
+    next-level-material: LIME_STAINED_GLASS_PANE

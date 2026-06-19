@@ -1,5 +1,5 @@
 name: FloydBackpack
-version: '1.0.4'
+version: '1.1.0-SNAPSHOT'
 main: com.floyd.backpack.FloydBackpackPlugin
 api-version: '1.20'
 prefix: Floyd-Backpack
@@ -28,3 +28,9 @@ permissions:
   floydbackpack.version:
     description: "显示版本信息"
     default: true
+  floydbackpack.upgrade:
+    description: "升级背包"
+    default: true
+  floydbackpack.admin:
+    description: "管理员权限（setlevel 等）"
+    default: op

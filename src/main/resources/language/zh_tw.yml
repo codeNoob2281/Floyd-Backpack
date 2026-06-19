@@ -26,8 +26,35 @@ command:
       tip-confirm: "§6輸入 §c/bp clear confirm §6確認"
       tip-cancel: "§6輸入 §c/bp clear cancel §6取消"
       operation-expired: "§e[Floyd-Backpack] §6上一個操作已過期"
+    upgrade:
+      success: "§a背包已升級至 Lv{0}！容量: {1} 格。"
+      max-level: "§c背包已達最大等級 (Lv{0})。"
+      no-permission: "§c無背包升級權限。"
+      disabled: "§c本伺服器已禁用背包升級。"
+      status: "§6背包: Lv{0} | §b已用 {1}/{2} 格。"
+    setlevel:
+      success: "§a已將 {0} 的背包設為 Lv{1} ({2} 格)。"
+      sender-only: "§c該命令只能由玩家執行。"
+      player-not-found: "§c未找到玩家: {0}。"
+      invalid-level: "§c無效等級。必須介於 1 和 {0} 之間。"
 chest-ui:
   backpack-title: "§6{0}的背包"
+  placeholder:
+    next-level-slot-name: "§a下一級解鎖"
+    next-level-slot-lore: "§e右鍵進行升級"
+    locked-slot-name: "§7已鎖定"
+  upgrade-confirm:
+    title: "§6升級確認"
+    current-lv: "§e當前: Lv{0}"
+    current-lv-lore: "§7{0} 格"
+    arrow: "§7→"
+    next-lv: "§a升級後: Lv{0}"
+    next-lv-lore: "§7{0} 格"
+    cost-title: "§e消耗"
+    cost-placeholder: "§7暫未開放..."
+    confirm: "§a✔ 確認升級"
+    cancel: "§c✘ 取消"
+    success: "§a背包已升級至 Lv{0}！容量: {1} 格。"
 backpack-tool:
   item-name: "§b[Floyd-Backpack]§6 右鍵打開背包"
   lore-line1: "§a§l手持該物品，右鍵打開背包"

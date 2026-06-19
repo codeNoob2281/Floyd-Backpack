@@ -6,8 +6,8 @@ import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.setting.SettingsReloadManager;
 import com.floyd.core.FloydPlugin;
 import com.floyd.core.PluginBizException;
-import com.floyd.core.logging.Logger;
 import com.floyd.core.logging.ConsoleLoggerFactory;
+import com.floyd.core.logging.Logger;
 import com.floyd.core.settings.PluginSettingsManager;
 import org.bukkit.Bukkit;
 import org.springframework.context.ApplicationContext;
@@ -66,6 +66,9 @@ public class FloydBackpackPlugin extends FloydPlugin {
             // 重新加载配置
             SettingsReloadManager settingsReloadManager = applicationContext.getBean(SettingsReloadManager.class);
             settingsReloadManager.reload();
+            // 重载等级映射
+            PlayerBackpackManager playerBackpackManager = applicationContext.getBean(PlayerBackpackManager.class);
+            playerBackpackManager.reloadLevelMapping();
             // 重载定时任务
             ConfirmOperationManager confirmOperationManager = applicationContext.getBean(ConfirmOperationManager.class);
             confirmOperationManager.reload();

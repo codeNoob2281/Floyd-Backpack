@@ -1,8 +1,8 @@
 package com.floyd.backpack.tools;
 
 import com.floyd.backpack.message.BackpackToolMsg;
+import com.floyd.backpack.ui.ChestButton;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -18,16 +18,11 @@ import java.util.List;
  *
  * @author floyd
  */
-public class OpenBackpackTool extends AbstractTool {
+public class OpenBackpackTool extends ChestButton {
 
     private static final NamespacedKey BACKPACK_TOOL_KEY = new NamespacedKey("floydbackpack", "backpack_tool");
 
-    private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
-
-    /**
-     * 获取ItemStack
-     */
-    public static ItemStack getItemStack() {
+    public OpenBackpackTool() {
         ItemStack is = new ItemStack(Material.ENDER_EYE, 1);
         ItemMeta itemMeta = is.getItemMeta();
         itemMeta.addEnchant(Enchantment.UNBREAKING, 10, true);
@@ -38,7 +33,7 @@ public class OpenBackpackTool extends AbstractTool {
         ));
         itemMeta.getPersistentDataContainer().set(BACKPACK_TOOL_KEY, PersistentDataType.BOOLEAN, true);
         is.setItemMeta(itemMeta);
-        return is;
+        this.item = is;
     }
 
     /**
