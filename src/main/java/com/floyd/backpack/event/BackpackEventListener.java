@@ -15,10 +15,7 @@ import net.kyori.adventure.sound.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryAction;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -186,6 +183,20 @@ public class BackpackEventListener implements Listener {
             if (involvesPlaceholder) {
                 event.setCancelled(true);
             }
+        }
+    }
+
+    /**
+     * 监听玩家关闭背包（非取消）事件。只要发生过 click/drag 并且是背包 UI，关闭时即写盘。
+     */
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        if (!(event.getPlayer() instanceof Player player)) {
+            return;
+        }
+        if (playerBackpackManager.isBackpackInventory(player, event.getInventory())) {
+            Backpack backpack = playerBackpackManager.getBackpack(player);
+            backpack.markDirty();
         }
     }
 

@@ -115,9 +115,7 @@ public class PlayerBackpackManager implements InitializingBean, DisposableBean {
             }
             int s = saved.get();
             int f = failed.get();
-            if (s > 0 || f > 0) {
-                logger.info("Autosave completed, saved: {}, failed: {}", s, f);
-            }
+            logger.info("Autosave completed, saved: {}, failed: {}", s, f);
         }, periodTicks, periodTicks);
         logger.info("Autosave task scheduled, interval: {}ms ({} ticks)", intervalMs, periodTicks);
     }
