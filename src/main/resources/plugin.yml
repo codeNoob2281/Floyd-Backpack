@@ -34,3 +34,6 @@ permissions:
   floydbackpack.admin:
     description: "管理员权限（setlevel 等）"
     default: op
+  floydbackpack.saveall:
+    description: "立即触发全量保存"
+    default: op

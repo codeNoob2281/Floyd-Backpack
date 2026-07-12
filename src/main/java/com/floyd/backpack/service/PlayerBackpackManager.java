@@ -16,6 +16,7 @@ import com.floyd.core.settings.PluginSettingsManager;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.AllArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -33,7 +34,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 
 /**
@@ -89,8 +89,8 @@ public class PlayerBackpackManager implements InitializingBean, DisposableBean {
         long intervalMs = pluginSettingsManager.getProperty(AutosaveSettings.INTERVAL);
         long periodTicks = Math.max(1, intervalMs / 50L);
         autosaveTask = Bukkit.getScheduler().runTaskTimer(BackpackPluginAccessor.getPlugin(), () -> {
-            AtomicInteger saved = new AtomicInteger(0);
-            AtomicInteger failed = new AtomicInteger(0);
+            int saved = 0;
+            int failed = 0;
             for (Map.Entry<String, Backpack> entry : PLAYER_BACKPACK_MAP.entrySet()) {
                 Backpack backpack = entry.getValue();
                 if (backpack == null || !backpack.isDirty()) {
@@ -105,17 +105,17 @@ public class PlayerBackpackManager implements InitializingBean, DisposableBean {
                     }
                     if (writeBackpackDataToFile(backpack)) {
                         backpack.clearDirty();
-                        saved.incrementAndGet();
+                        saved++;
                     } else {
-                        failed.incrementAndGet();
+                        failed++;
                     }
                 } finally {
                     lock.unlock();
                 }
             }
-            int s = saved.get();
-            int f = failed.get();
-            logger.info("Autosave completed, saved: {}, failed: {}", s, f);
+            AutosaveResult result = new AutosaveResult(0, saved, failed);
+            logger.info("Autosave completed, saved: {}, failed: {}, allSuccess: {}, empty: {}",
+                    saved, failed, result.isAllSuccess(), result.isEmpty());
         }, periodTicks, periodTicks);
         logger.info("Autosave task scheduled, interval: {}ms ({} ticks)", intervalMs, periodTicks);
     }
@@ -160,27 +160,51 @@ public class PlayerBackpackManager implements InitializingBean, DisposableBean {
         return PLAYER_BACKPACK_MAP.computeIfAbsent(getUuid(player), uuid -> createBackpack(player));
     }
 
-    public void saveAllBackpack() {
+    public AutosaveResult saveAllBackpack() {
         logger.info("Saving all player backpack data");
-        AtomicInteger successCount = new AtomicInteger(0);
-        AtomicInteger failCount = new AtomicInteger(0);
+        int dirtyCount = 0;
+        int successCount = 0;
+        int failCount = 0;
         for (String uuid : PLAYER_BACKPACK_MAP.keySet()) {
             Backpack backpack = PLAYER_BACKPACK_MAP.get(uuid);
             if (backpack != null) {
                 Lock lock = backpack.getLock();
                 lock.lock();
                 try {
+                    if (!backpack.isDirty()) {
+                        continue;
+                    }
+                    dirtyCount++;
                     if (writeBackpackDataToFile(backpack)) {
-                        successCount.incrementAndGet();
+                        backpack.clearDirty();
+                        successCount++;
                     } else {
-                        failCount.incrementAndGet();
+                        failCount++;
                     }
                 } finally {
                     lock.unlock();
                 }
             }
         }
-        logger.info("All player backpack data saved, success: {}, failed: {}", successCount.get(), failCount.get());
+        logger.info("All player backpack data saved, dirty: {}, success: {}, failed: {}", dirtyCount, successCount, failCount);
+        return new AutosaveResult(dirtyCount, successCount, failCount);
+    }
+
+    /**
+     * 自动保存结果对象，封装本轮定时/手动保存的计数
+     */
+    public record AutosaveResult(int dirtyCount, int successCount, int failCount) {
+        public int getTotalCount() {
+            return successCount + failCount;
+        }
+
+        public boolean isAllSuccess() {
+            return failCount == 0;
+        }
+
+        public boolean isEmpty() {
+            return dirtyCount == 0;
+        }
     }
 
     public boolean flushBackpackToFile(Player player) {

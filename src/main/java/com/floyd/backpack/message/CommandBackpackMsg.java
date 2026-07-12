@@ -13,6 +13,15 @@ public class CommandBackpackMsg implements I18nMessageHolder {
     public static final LocaleMessage CONSOLE_NOT_ALLOWED =
             LocaleMessage.of("command.backpack.console-not-allowed", "§cCannot execute this command from console.");
 
+    public static final LocaleMessage SAVE_ALL_START =
+            LocaleMessage.of("command.backpack.saveall.start", "§aSaving all backpack data...");
+
+    public static final LocaleMessage SAVE_ALL_SUCCESS =
+            LocaleMessage.of("command.backpack.saveall.success", "§aAll backpack data saved, success: §c{0}§a, failed: §c{1}§a.");
+
+    public static final LocaleMessage SAVE_ALL_NO_OP_PERMISSION =
+            LocaleMessage.of("command.backpack.saveall.no-permission", "§cNo permission to save all backpack data.");
+
     public static final LocaleMessage RELOAD_START =
             LocaleMessage.of("command.backpack.reload.start", "§aReloading config...");
 

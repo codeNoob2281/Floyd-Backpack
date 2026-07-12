@@ -15,6 +15,10 @@ command:
       more-info: "§e訪問 §f§nhttps://github.com/codeNoob2281/Floyd-Backpack§e 獲取更多信息。"
     version:
       info: "§b[Floyd-Backpack] §a版本: {0} §7| §a作者: {1}"
+    saveall:
+      start: "§a正在保存所有背包數據..."
+      success: "§a背包數據已保存，成功: §c{0}§a 個，失敗: §c{1}§a 個。"
+      no-permission: "§c無保存背包數據權限。"
     clear:
       feature-disabled: "§c當前未啟用清空背包功能"
       pending-operation-exists: "§e當前仍存在一個待確認的操作，請繼續執行"
