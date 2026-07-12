@@ -118,6 +118,8 @@ public class BackpackClearCmdHandler extends AbstractCmdHandler {
 
     private void execClearBackpack(@NotNull CommandSender sender) {
         int clearItemSize = clearBackpack(sender);
+        // 清空后库存发生变更，标记脏以便定时任务写盘
+        playerBackpackManager.getBackpack((Player) sender).markDirty();
         sender.sendMessage(CommandBackpackClearMsg.CLEARED.content(clearItemSize));
         logger.info("Cleared backpack for [{}], removed [{}] items", sender.getName(), clearItemSize);
     }

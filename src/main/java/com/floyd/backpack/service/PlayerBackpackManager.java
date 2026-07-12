@@ -4,6 +4,7 @@ import com.floyd.backpack.BackpackPluginAccessor;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.entity.PlaceHolderItem;
 import com.floyd.backpack.message.ChestUIMsg;
+import com.floyd.backpack.setting.properties.AutosaveSettings;
 import com.floyd.backpack.setting.properties.UpgradeSettings;
 import com.floyd.core.common.util.DateUtil;
 import com.floyd.core.common.util.FileUtil;
@@ -15,10 +16,13 @@ import com.floyd.core.settings.PluginSettingsManager;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,11 +41,16 @@ import java.util.concurrent.locks.Lock;
  * @date 2026/3/23
  */
 @Component
-public class PlayerBackpackManager implements InitializingBean {
+public class PlayerBackpackManager implements InitializingBean, DisposableBean {
 
     public static final int INITIAL_BACKPACK_MAP_CAPACITY = 32;
 
     private static final Logger logger = ConsoleLoggerFactory.get(PlayerBackpackManager.class);
+
+    /**
+     * 定时自动保存任务
+     */
+    private BukkitTask autosaveTask;
 
     private final Map<String, Backpack> PLAYER_BACKPACK_MAP = new ConcurrentHashMap<>(INITIAL_BACKPACK_MAP_CAPACITY);
 
@@ -55,6 +64,72 @@ public class PlayerBackpackManager implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         loadLevelMapping();
+        scheduleAutosaveTask();
+    }
+
+    @Override
+    public void destroy() {
+        cancelAutosaveTask();
+    }
+
+    public void reloadAutosaveTask() {
+        cancelAutosaveTask();
+        scheduleAutosaveTask();
+    }
+
+    /**
+     * 调度定时自动保存任务。仅保存脏（自上次持久化后发生过修改）的背包，以减少 I/O。
+     */
+    private void scheduleAutosaveTask() {
+        Boolean enable = pluginSettingsManager.getProperty(AutosaveSettings.ENABLE);
+        if (!enable) {
+            logger.info("Autosave is disabled");
+            return;
+        }
+        long intervalMs = pluginSettingsManager.getProperty(AutosaveSettings.INTERVAL);
+        long periodTicks = Math.max(1, intervalMs / 50L);
+        autosaveTask = Bukkit.getScheduler().runTaskTimer(BackpackPluginAccessor.getPlugin(), () -> {
+            AtomicInteger saved = new AtomicInteger(0);
+            AtomicInteger failed = new AtomicInteger(0);
+            for (Map.Entry<String, Backpack> entry : PLAYER_BACKPACK_MAP.entrySet()) {
+                Backpack backpack = entry.getValue();
+                if (backpack == null || !backpack.isDirty()) {
+                    continue;
+                }
+                Lock lock = backpack.getLock();
+                lock.lock();
+                try {
+                    // 双重检查：加锁后再次确认，避免重复保存
+                    if (!backpack.isDirty()) {
+                        continue;
+                    }
+                    if (writeBackpackDataToFile(backpack)) {
+                        backpack.clearDirty();
+                        saved.incrementAndGet();
+                    } else {
+                        failed.incrementAndGet();
+                    }
+                } finally {
+                    lock.unlock();
+                }
+            }
+            int s = saved.get();
+            int f = failed.get();
+            if (s > 0 || f > 0) {
+                logger.info("Autosave completed, saved: {}, failed: {}", s, f);
+            }
+        }, periodTicks, periodTicks);
+        logger.info("Autosave task scheduled, interval: {}ms ({} ticks)", intervalMs, periodTicks);
+    }
+
+    /**
+     * 取消定时自动保存任务
+     */
+    private void cancelAutosaveTask() {
+        if (autosaveTask != null) {
+            autosaveTask.cancel();
+            autosaveTask = null;
+        }
     }
 
     /**
@@ -164,6 +239,9 @@ public class PlayerBackpackManager implements InitializingBean {
             backpack.setUpgrade(newLevel, newUsableSlots);
             backpack.setNextLevelUsableSlots(
                     newLevel >= getMaxLevel() ? newUsableSlots : getUsableSlots(newLevel + 1));
+
+            // 写盘 setUpgrade 内部已 markDirty 一次；此处显式再脏一次，防两种写盘间的并发修改丢失
+            backpack.markDirty();
 
             if (newUsableSlots > oldUsableSlots) {
                 // 升级：将溢出物品中属于新可用范围的放回 inventory

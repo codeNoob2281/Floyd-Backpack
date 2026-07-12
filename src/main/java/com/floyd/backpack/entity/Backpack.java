@@ -52,6 +52,26 @@ public class Backpack implements InventoryHolder {
     @Getter
     private final Lock lock = new ReentrantLock();
 
+    /**
+     * 脏标记：true 表示自上次持久化以来发生过修改，定时任务仅写盘此类背包
+     */
+    @Getter
+    private volatile boolean dirty = false;
+
+    /**
+     * 标记背包为已修改。任何对 inventory/等级/容量的写操作完成后调用此方法。
+     */
+    public void markDirty() {
+        this.dirty = true;
+    }
+
+    /**
+     * 清除脏标记，定时任务成功写盘后调用。
+     */
+    public void clearDirty() {
+        this.dirty = false;
+    }
+
     @Getter
     @Setter
     private String title;
@@ -111,6 +131,7 @@ public class Backpack implements InventoryHolder {
         newUsableSlots = fixedUsableSlots(newUsableSlots);
         this.level = newLevel;
         this.usableSlots = newUsableSlots;
+        markDirty();
     }
 
     @Override
