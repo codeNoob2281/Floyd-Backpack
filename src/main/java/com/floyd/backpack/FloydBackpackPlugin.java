@@ -58,7 +58,7 @@ public class FloydBackpackPlugin extends FloydPlugin {
         } catch (Exception e) {
             logger.error("Failed to destroy PlayerBackpackManager", e);
         }
-        playerBackpackManager.saveAllBackpack();
+        playerBackpackManager.saveAllBackpack(true);
     }
 
     /**

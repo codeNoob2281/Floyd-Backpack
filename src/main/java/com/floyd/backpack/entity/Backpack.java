@@ -135,6 +135,18 @@ public class Backpack implements InventoryHolder {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Backpack backpack)) return false;
+        return playerUuid.equals(backpack.playerUuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return playerUuid.hashCode();
+    }
+
+    @Override
     public @NotNull Inventory getInventory() {
         rebuildIfNeeded();
         return this.inventory;
