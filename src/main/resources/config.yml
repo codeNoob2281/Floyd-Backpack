@@ -13,6 +13,11 @@ command:
 i18n:
   # Locale to use for internationalization
   locale: en
+autosave:
+  # Enable periodic auto-save of backpack data (prevents data loss on server crash)
+  enable: true
+  # Auto-save interval in milliseconds (default: 300000 = 5 minutes)
+  interval: 300000
 upgrade:
   # Whether backpack upgrade is enabled
   enabled: true

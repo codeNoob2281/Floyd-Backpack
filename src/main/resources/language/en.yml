@@ -15,6 +15,10 @@ command:
       more-info: "§eVisit §f§nhttps://github.com/codeNoob2281/Floyd-Backpack§e for more info."
     version:
       info: "§b[Floyd-Backpack] §aVersion: {0} §7| §aAuthor: {1}"
+    saveall:
+      start: "§aSaving all backpack data..."
+      success: "§aBackpack data saved, success: §c{0}§a, failed: §c{1}§a."
+      no-permission: "§cNo permission to save all backpack data."
     clear:
       feature-disabled: "§cClear backpack feature is not enabled."
       pending-operation-exists: "§eA pending confirmation operation already exists, please proceed."

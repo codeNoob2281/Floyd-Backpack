@@ -45,4 +45,9 @@ public class PermConstant {
      */
     public static final String ADMIN_BACKPACK = PREFIX + "admin";
 
+    /**
+     * 立即触发全量保存权限
+     */
+    public static final String SAVE_ALL = PREFIX + "saveall";
+
 }

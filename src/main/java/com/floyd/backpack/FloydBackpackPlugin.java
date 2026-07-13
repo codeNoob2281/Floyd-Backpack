@@ -51,9 +51,14 @@ public class FloydBackpackPlugin extends FloydPlugin {
 
     @Override
     protected void cleanup() {
-        // 保存背包数据
+        // 取消定时自动保存任务 & 保存背包数据
         PlayerBackpackManager playerBackpackManager = getApplicationContext().getBean(PlayerBackpackManager.class);
-        playerBackpackManager.saveAllBackpack();
+        try {
+            playerBackpackManager.destroy();
+        } catch (Exception e) {
+            logger.error("Failed to destroy PlayerBackpackManager", e);
+        }
+        playerBackpackManager.saveAllBackpack(true);
     }
 
     /**
@@ -72,6 +77,8 @@ public class FloydBackpackPlugin extends FloydPlugin {
             // 重载定时任务
             ConfirmOperationManager confirmOperationManager = applicationContext.getBean(ConfirmOperationManager.class);
             confirmOperationManager.reload();
+            // 重载自动保存任务（使新的 autosave 配置立即生效）
+            playerBackpackManager.reloadAutosaveTask();
             // 重载日志系统
             PluginSettingsManager pluginSettingsManager = applicationContext.getBean(PluginSettingsManager.class);
             ConsoleLoggerFactory.reloadFromConfig(pluginSettingsManager);

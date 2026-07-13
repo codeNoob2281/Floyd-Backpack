@@ -78,6 +78,20 @@ public class BackpackSubCmdHandler extends AbstractCmdHandler {
         sender.sendMessage(CommandBackpackMsg.VERSION_INFO.content(meta.getVersion(), author));
     }
 
+    @SubCommandMapping(commands = "save-all", permission = PermConstant.SAVE_ALL)
+    public void onSaveAllCmd(@NotNull CommandSender sender) {
+        sender.sendMessage(CommandBackpackMsg.SAVE_ALL_START.content());
+        PlayerBackpackManager.AutosaveResult result = playerBackpackManager.saveAllBackpack();
+        sender.sendMessage(CommandBackpackMsg.SAVE_ALL_SUCCESS.content(
+                result.successCount(), result.failCount()));
+        if (result.isAllSuccess()) {
+            logger.info("SaveAll by [{}] completed, success: {}", sender.getName(), result.successCount());
+        } else {
+            logger.warn("SaveAll by [{}] completed with failures, success: {}, failed: {}",
+                    sender.getName(), result.successCount(), result.failCount());
+        }
+    }
+
     @SubCommandMapping(isFallback = true)
     public boolean onErrorCmd(@NotNull CommandSender sender) {
         onShowHelpCmd(sender);

@@ -4,6 +4,7 @@ import com.floyd.backpack.BackpackPluginAccessor;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.entity.PlaceHolderItem;
 import com.floyd.backpack.message.ChestUIMsg;
+import com.floyd.backpack.setting.properties.AutosaveSettings;
 import com.floyd.backpack.setting.properties.UpgradeSettings;
 import com.floyd.core.common.util.DateUtil;
 import com.floyd.core.common.util.FileUtil;
@@ -15,10 +16,13 @@ import com.floyd.core.settings.PluginSettingsManager;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,7 +33,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 
 /**
@@ -37,11 +40,16 @@ import java.util.concurrent.locks.Lock;
  * @date 2026/3/23
  */
 @Component
-public class PlayerBackpackManager implements InitializingBean {
+public class PlayerBackpackManager implements InitializingBean, DisposableBean {
 
     public static final int INITIAL_BACKPACK_MAP_CAPACITY = 32;
 
     private static final Logger logger = ConsoleLoggerFactory.get(PlayerBackpackManager.class);
+
+    /**
+     * 定时自动保存任务
+     */
+    private BukkitTask autosaveTask;
 
     private final Map<String, Backpack> PLAYER_BACKPACK_MAP = new ConcurrentHashMap<>(INITIAL_BACKPACK_MAP_CAPACITY);
 
@@ -55,6 +63,117 @@ public class PlayerBackpackManager implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         loadLevelMapping();
+        scheduleAutosaveTask();
+    }
+
+    @Override
+    public void destroy() {
+        cancelAutosaveTask();
+    }
+
+    public void reloadAutosaveTask() {
+        cancelAutosaveTask();
+        scheduleAutosaveTask();
+    }
+
+    /**
+     * 调度定时自动保存任务。仅保存脏（自上次持久化后发生过修改）的背包，以减少 I/O。
+     * <p>
+     * 序列化在主线程执行（保证 Bukkit 容器线程安全），文件 I/O 在异步线程执行（避免主线程阻塞）。
+     */
+    private void scheduleAutosaveTask() {
+        Boolean enable = pluginSettingsManager.getProperty(AutosaveSettings.ENABLE);
+        if (!enable) {
+            logger.info("Autosave is disabled");
+            return;
+        }
+        long rawInterval = pluginSettingsManager.getProperty(AutosaveSettings.INTERVAL);
+        // 防御性编程：限制最小自动保存间隔为 1 秒（1000ms），防止配置错误导致服务器卡顿
+        long intervalMs = Math.max(1000L, rawInterval);
+        if (rawInterval != intervalMs) {
+            logger.warn("Autosave interval {}ms is too low, clamped to {}ms (minimum 1000ms)", rawInterval, intervalMs);
+        }
+        long periodTicks = intervalMs / 50L;
+        autosaveTask = Bukkit.getScheduler().runTaskTimer(BackpackPluginAccessor.getPlugin(), () -> {
+            // 第 1 步：主线程安全地序列化脏背包数据快照
+            Map<Backpack, String> snapshots = new HashMap<>();
+            for (Map.Entry<String, Backpack> entry : PLAYER_BACKPACK_MAP.entrySet()) {
+                Backpack backpack = entry.getValue();
+                if (backpack == null || !backpack.isDirty()) {
+                    continue;
+                }
+                Lock lock = backpack.getLock();
+                lock.lock();
+                try {
+                    if (!backpack.isDirty()) {
+                        continue;
+                    }
+                    snapshots.put(backpack, serializeBackpackToJson(backpack));
+                    backpack.clearDirty();
+                } finally {
+                    lock.unlock();
+                }
+            }
+
+            if (snapshots.isEmpty()) {
+                return;
+            }
+
+            // 第 2 步：异步执行文件 I/O，避免主线程阻塞导致 TPS 下降
+            Bukkit.getScheduler().runTaskAsynchronously(BackpackPluginAccessor.getPlugin(), () -> {
+                int saved = 0;
+                int failed = 0;
+                for (Map.Entry<Backpack, String> entry : snapshots.entrySet()) {
+                    Backpack backpack = entry.getKey();
+                    String json = entry.getValue();
+                    File dataFile = getBackpackDataFile(backpack.getPlayerUuid());
+                    try {
+                        FileUtil.writeString(dataFile, json, StandardCharsets.UTF_8);
+                        saved++;
+                    } catch (IOException e) {
+                        logger.error("Autosave failed for player [{}]", backpack.getPlayerName(), e);
+                        failed++;
+                        // 写入失败时重新标记为 dirty，以便下次重试
+                        backpack.markDirty();
+                    }
+                }
+                logger.info("Autosave completed, saved: {}, failed: {}", saved, failed);
+            });
+        }, periodTicks, periodTicks);
+        logger.info("Autosave task scheduled, interval: {}ms ({} ticks)", intervalMs, periodTicks);
+    }
+
+    /**
+     * 将背包数据序列化为 JSON 字符串。调用方需持有背包锁。
+     */
+    private String serializeBackpackToJson(Backpack backpack) {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("_level", backpack.getLevel());
+
+        Inventory inventory = backpack.getInventory();
+        int usableSlots = backpack.getUsableSlots();
+
+        for (int i = 0; i < usableSlots; i++) {
+            ItemStack itemStack = inventory.getItem(i);
+            if (itemStack != null && !PlaceHolderItem.isPlaceholder(itemStack)) {
+                jsonObject.addProperty(String.valueOf(i), ITEM_STACK_SERIALIZER.serialize(itemStack));
+            }
+        }
+
+        backpack.getOverflowItems().forEach((slot, base64) ->
+                jsonObject.addProperty(String.valueOf(slot), base64));
+
+        return jsonObject.toString();
+    }
+
+    /**
+     * 取消定时自动保存任务
+     */
+    private void cancelAutosaveTask() {
+        if (autosaveTask != null) {
+            autosaveTask.cancel();
+            autosaveTask = null;
+        }
     }
 
     /**
@@ -87,27 +206,62 @@ public class PlayerBackpackManager implements InitializingBean {
         return PLAYER_BACKPACK_MAP.computeIfAbsent(getUuid(player), uuid -> createBackpack(player));
     }
 
-    public void saveAllBackpack() {
-        logger.info("Saving all player backpack data");
-        AtomicInteger successCount = new AtomicInteger(0);
-        AtomicInteger failCount = new AtomicInteger(0);
+    public AutosaveResult saveAllBackpack() {
+        return saveAllBackpack(false);
+    }
+
+    /**
+     * 保存所有背包数据到磁盘
+     *
+     * @param force 是否强制保存所有背包（无视 dirty 标记）。关服/重载时应传入 true，
+     *              避免玩家打开中的背包因未标记 dirty 而丢失数据
+     */
+    public AutosaveResult saveAllBackpack(boolean force) {
+        logger.info("Saving all player backpack data, force: {}", force);
+        int dirtyCount = 0;
+        int successCount = 0;
+        int failCount = 0;
         for (String uuid : PLAYER_BACKPACK_MAP.keySet()) {
             Backpack backpack = PLAYER_BACKPACK_MAP.get(uuid);
             if (backpack != null) {
                 Lock lock = backpack.getLock();
                 lock.lock();
                 try {
+                    if (!force && !backpack.isDirty()) {
+                        continue;
+                    }
+                    dirtyCount++;
                     if (writeBackpackDataToFile(backpack)) {
-                        successCount.incrementAndGet();
+                        backpack.clearDirty();
+                        successCount++;
                     } else {
-                        failCount.incrementAndGet();
+                        failCount++;
                     }
                 } finally {
                     lock.unlock();
                 }
             }
         }
-        logger.info("All player backpack data saved, success: {}, failed: {}", successCount.get(), failCount.get());
+        logger.info("All player backpack data saved, force: {}, count: {}, success: {}, failed: {}",
+                force, dirtyCount, successCount, failCount);
+        return new AutosaveResult(dirtyCount, successCount, failCount);
+    }
+
+    /**
+     * 自动保存结果对象，封装本轮定时/手动保存的计数
+     */
+    public record AutosaveResult(int dirtyCount, int successCount, int failCount) {
+        public int getTotalCount() {
+            return successCount + failCount;
+        }
+
+        public boolean isAllSuccess() {
+            return failCount == 0;
+        }
+
+        public boolean isEmpty() {
+            return dirtyCount == 0;
+        }
     }
 
     public boolean flushBackpackToFile(Player player) {
@@ -165,6 +319,9 @@ public class PlayerBackpackManager implements InitializingBean {
             backpack.setNextLevelUsableSlots(
                     newLevel >= getMaxLevel() ? newUsableSlots : getUsableSlots(newLevel + 1));
 
+            // 写盘 setUpgrade 内部已 markDirty 一次；此处显式再脏一次，防两种写盘间的并发修改丢失
+            backpack.markDirty();
+
             if (newUsableSlots > oldUsableSlots) {
                 // 升级：将溢出物品中属于新可用范围的放回 inventory
                 Inventory inventory = backpack.getInventory();
@@ -189,27 +346,10 @@ public class PlayerBackpackManager implements InitializingBean {
         if (backpack == null) {
             return false;
         }
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("_level", backpack.getLevel());
-
-        Inventory inventory = backpack.getInventory();
-        int usableSlots = backpack.getUsableSlots();
-
-        // 序列化可见槽位
-        for (int i = 0; i < usableSlots; i++) {
-            ItemStack itemStack = inventory.getItem(i);
-            if (itemStack != null && !PlaceHolderItem.isPlaceholder(itemStack)) {
-                jsonObject.addProperty(String.valueOf(i), ITEM_STACK_SERIALIZER.serialize(itemStack));
-            }
-        }
-
-        // 保留溢出物品（隐藏但未丢失的物品）
-        backpack.getOverflowItems().forEach((slot, base64) ->
-                jsonObject.addProperty(String.valueOf(slot), base64));
 
         File dataFile = getBackpackDataFile(backpack.getPlayerUuid());
         try {
-            FileUtil.writeString(dataFile, jsonObject.toString(), StandardCharsets.UTF_8);
+            FileUtil.writeString(dataFile, serializeBackpackToJson(backpack), StandardCharsets.UTF_8);
             return true;
         } catch (IOException e) {
             logger.error("Failed to save backpack data for player [{}]", backpack.getPlayerName(), e);

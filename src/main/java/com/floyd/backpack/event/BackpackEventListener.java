@@ -14,11 +14,9 @@ import com.floyd.core.settings.PluginSettingsManager;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryAction;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -186,6 +184,32 @@ public class BackpackEventListener implements Listener {
             if (involvesPlaceholder) {
                 event.setCancelled(true);
             }
+        }
+    }
+
+    /**
+     * 监听背包内物品变更事件（点击）。
+     * 使用 MONITOR 优先级 + ignoreCancelled = true，确保仅在发生未被取消的物品变更时标记脏数据。
+     * 相比监听 onInventoryClose，此方式：
+     * 1. 避免仅打开查看未做修改时的无意义写盘
+     * 2. 确保长时间打开背包期间发生的修改能被定时任务捕获保存
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBackpackModify(InventoryClickEvent event) {
+        if (event.getWhoClicked() instanceof Player player
+                && playerBackpackManager.isBackpackInventory(player, event.getInventory())) {
+            playerBackpackManager.getBackpack(player).markDirty();
+        }
+    }
+
+    /**
+     * 监听背包内物品拖拽变更事件。与 {@link #onBackpackModify} 配合覆盖所有修改路径。
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBackpackModifyDrag(InventoryDragEvent event) {
+        if (event.getWhoClicked() instanceof Player player
+                && playerBackpackManager.isBackpackInventory(player, event.getInventory())) {
+            playerBackpackManager.getBackpack(player).markDirty();
         }
     }
 
