@@ -45,7 +45,7 @@ chest-ui:
   backpack-title: "§6{0}''s backpack"
   placeholder:
     next-level-slot-name: "§aNext Level Unlock"
-    next-level-slot-lore: "§eRight-click to upgrade"
+    next-level-slot-lore: "§eShift+Left-click to upgrade"
     locked-slot-name: "§7Unlocked"
   upgrade-confirm:
     title: "§6Upgrade Confirmation"

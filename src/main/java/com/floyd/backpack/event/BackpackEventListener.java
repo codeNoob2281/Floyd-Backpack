@@ -109,7 +109,7 @@ public class BackpackEventListener implements Listener {
             ItemStack current = event.getCurrentItem();
             if (PlaceHolderItem.isPlaceholder(current)) {
                 event.setCancelled(true);
-                if (PlaceHolderItem.isNextLevelPlaceholder(current) && event.getClick().isRightClick()) {
+                if (PlaceHolderItem.isNextLevelPlaceholder(current) && event.getClick() == ClickType.SHIFT_LEFT) {
                     tryOpenUpgradeConfirm(player);
                 }
                 return;
