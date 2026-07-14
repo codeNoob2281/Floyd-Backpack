@@ -23,6 +23,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.geysermc.geyser.api.GeyserApi;
 
 /**
  * @author floyd
@@ -109,8 +110,10 @@ public class BackpackEventListener implements Listener {
             ItemStack current = event.getCurrentItem();
             if (PlaceHolderItem.isPlaceholder(current)) {
                 event.setCancelled(true);
-                if (PlaceHolderItem.isNextLevelPlaceholder(current) && event.getClick() == ClickType.SHIFT_LEFT) {
-                    tryOpenUpgradeConfirm(player);
+                if (PlaceHolderItem.isNextLevelPlaceholder(current)) {
+                    if (isBedrockPlayer(player) ? event.getClick() == ClickType.LEFT : event.getClick() == ClickType.SHIFT_LEFT) {
+                        tryOpenUpgradeConfirm(player);
+                    }
                 }
                 return;
             }
@@ -210,6 +213,19 @@ public class BackpackEventListener implements Listener {
         if (event.getWhoClicked() instanceof Player player
                 && playerBackpackManager.isBackpackInventory(player, event.getInventory())) {
             playerBackpackManager.getBackpack(player).markDirty();
+        }
+    }
+
+    /**
+     * 检测玩家是否为基岩版玩家（通过 Geyser API）。
+     * 未安装 Geyser 时安全返回 false。
+     */
+    private static boolean isBedrockPlayer(Player player) {
+        try {
+            GeyserApi api = GeyserApi.api();
+            return api.isBedrockPlayer(player.getUniqueId());
+        } catch (Throwable e) {
+            return false;
         }
     }
 
