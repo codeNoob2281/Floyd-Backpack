@@ -21,7 +21,7 @@ public class ChestUIMsg implements I18nMessageHolder {
             LocaleMessage.of("chest-ui.placeholder.next-level-slot-name", "§aNext Level Unlock");
 
     public static final LocaleMessage PLACEHOLDER_NEXT_LEVEL_SLOT_LORE =
-            LocaleMessage.of("chest-ui.placeholder.next-level-slot-lore", "§eRight-click to upgrade");
+            LocaleMessage.of("chest-ui.placeholder.next-level-slot-lore", "§eShift+Left-click to upgrade");
 
     public static final LocaleMessage UPGRADE_CONFIRM_TITLE =
             LocaleMessage.of("chest-ui.upgrade-confirm.title", "§6Upgrade Confirmation");

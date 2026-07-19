@@ -7,12 +7,12 @@ import com.floyd.backpack.message.CommandBackpackMsg;
 import com.floyd.backpack.message.CommandBackpackUpgradeMsg;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.setting.properties.UpgradeSettings;
+import com.floyd.backpack.ui.BackpackUpgradeConfirmGui;
 import com.floyd.core.command.SubCommandHandler;
 import com.floyd.core.command.SubCommandMapping;
 import com.floyd.core.command.param.ParameterCompleterFactory;
 import com.floyd.core.command.param.SubCommandParam;
 import com.floyd.core.settings.PluginSettingsManager;
-import net.kyori.adventure.sound.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -58,20 +58,9 @@ public class BackpackUpgradeCmdHandler extends AbstractCmdHandler {
             return;
         }
 
-        // 若背包当前打开，先关闭
-        if (player.getOpenInventory().getTopInventory() == backpack.getInventory()) {
-            player.closeInventory();
-        }
-
-        playerBackpackManager.setBackpackLevel(backpack, newLevel, newUsableSlots);
-
-        // 重新打开背包
-        player.openInventory(backpack.getInventory());
-
-        sender.sendMessage(CommandBackpackUpgradeMsg.UPGRADE_SUCCESS.content(newLevel, newUsableSlots));
-        player.playSound(Sound.sound()
-                .type(org.bukkit.Sound.ENTITY_PLAYER_LEVELUP)
-                .build());
+        // 打开升级确认 GUI（代替直接升级，让玩家确认消耗）
+        new BackpackUpgradeConfirmGui(player, backpack, currentLevel, newLevel,
+                backpack.getUsableSlots(), newUsableSlots).open();
     }
 
     @SubCommandMapping(commands = "set-level", permission = PermConstant.ADMIN_BACKPACK)

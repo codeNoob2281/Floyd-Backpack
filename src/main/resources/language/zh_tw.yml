@@ -45,7 +45,7 @@ chest-ui:
   backpack-title: "§6{0}的背包"
   placeholder:
     next-level-slot-name: "§a下一級解鎖"
-    next-level-slot-lore: "§e右鍵進行升級"
+    next-level-slot-lore: "§eShift+左鍵進行升級"
     locked-slot-name: "§7已鎖定"
   upgrade-confirm:
     title: "§6升級確認"
