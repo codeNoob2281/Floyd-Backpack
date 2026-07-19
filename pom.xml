@@ -14,7 +14,7 @@
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dependencies.floyd-core.version>1.0.6-SNAPSHOT</dependencies.floyd-core.version>
+        <dependencies.floyd-core.version>1.0.6</dependencies.floyd-core.version>
         <dependencies.lombok.version>1.18.30</dependencies.lombok.version>
         <dependencies.paper-api.version>1.20.6-R0.1-SNAPSHOT</dependencies.paper-api.version>
     </properties>
@@ -63,16 +63,16 @@
             <id>papermc-repo</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
-        <repository>
-            <id>github</id>
-            <url>https://maven.pkg.github.com/codeNoob2281/Floyd-Core</url>
-        </repository>
+            <repository>
+                <id>jitpack.io</id>
+                <url>https://jitpack.io</url>
+            </repository>
     </repositories>
 
     <dependencies>
         <dependency>
-            <groupId>com.floyd.mc</groupId>
-            <artifactId>floyd-core</artifactId>
+            <groupId>com.github.codeNoob2281</groupId>
+            <artifactId>Floyd-Core</artifactId>
             <version>${dependencies.floyd-core.version}</version>
         </dependency>
         <dependency>
