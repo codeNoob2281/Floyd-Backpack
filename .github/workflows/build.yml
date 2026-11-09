@@ -1,0 +1,114 @@
+name: Build & Release
+
+# 两者结合：
+#  - push 到 main/master、提交 PR、手动触发 → 只做构建校验并上传产物
+#  - 推送任意 tag（如 v1.2.0 / 1.2.0）→ 构建并发布 GitHub Release + Modrinth
+on:
+  push:
+    branches: [main, master]
+    tags: ['*']
+  pull_request:
+  workflow_dispatch:
+
+# 默认只读；发布作业单独提权
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (Maven, JDK 21)
+    runs-on: ubuntu-latest
+    outputs:
+      TAG: ${{ steps.get_tag.outputs.TAG }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn -B --no-transfer-progress clean package -DskipTests
+
+      - name: Stage artifact
+        run: |
+          mkdir -p staging
+          cp target/Floyd-Backpack-*.jar staging/
+
+      - name: Get tag
+        id: get_tag
+        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: staging/*.jar
+          if-no-files-found: error
+
+  release-github:
+    name: GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+          path: staging
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.build.outputs.TAG }}
+          name: ${{ needs.build.outputs.TAG }}
+          files: staging/*.jar
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-modrinth:
+    name: Modrinth Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+          path: staging
+
+      - name: Publish to Modrinth
+        uses: Kir-Antipov/mc-publish@v3
+        with:
+          modrinth-id: ${{ vars.MODRINTH_PROJECT_ID }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          files: staging/*.jar
+          name: ${{ needs.build.outputs.TAG }}
+          version: ${{ needs.build.outputs.TAG }}
+          version-type: release
+          # 本插件使用 Paper 专属 API（io.papermc.paper...），仅支持 Paper/Purpur
+          loaders: |
+            paper
+            purpur
+          # 编译目标为 paper-api 1.21.11；如需覆盖更低 1.21.x 请在此增补（须为 Modrinth 存在的版本号）
+          game-versions: |
+            1.21.11
+            26.1
+            26.2
+            26.3
+          changelog: See https://github.com/codeNoob2281/Floyd-Backpack/releases/tag/${{ needs.build.outputs.TAG }}
+          fail-mode: fail
