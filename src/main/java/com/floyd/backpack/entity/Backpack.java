@@ -365,58 +365,58 @@ public class Backpack implements InventoryHolder {
     private void setNavItems(Inventory inv, int page) {
         int pageCount = getPageCount();
         // 左下：返回（关闭背包）
-        inv.setItem(SLOT_RETURN, navItem(Material.BARRIER, "§c返回", NAV_RETURN_KEY,
-                List.of("§7关闭个人仓库")));
+        inv.setItem(SLOT_RETURN, navItem(Material.BARRIER, ChestUIMsg.NAV_RETURN_NAME.content(), NAV_RETURN_KEY,
+                List.of(ChestUIMsg.NAV_RETURN_LORE.content())));
         // 全部存入
-        inv.setItem(SLOT_DEPOSIT_ALL, navItem(Material.CHEST, "§a全部存入", NAV_DEPOSIT_KEY,
-                List.of("§7把背包里的物品存入仓库", "§7(自动合并到同类堆叠)")));
+        inv.setItem(SLOT_DEPOSIT_ALL, navItem(Material.CHEST, ChestUIMsg.NAV_DEPOSIT_NAME.content(), NAV_DEPOSIT_KEY,
+                List.of(ChestUIMsg.NAV_DEPOSIT_LORE1.content(), ChestUIMsg.NAV_DEPOSIT_LORE2.content())));
         // 上一页
         if (page > 0) {
-            inv.setItem(SLOT_PREV, navItem(Material.ARROW, "§e上一页", NAV_PREV_KEY, null));
+            inv.setItem(SLOT_PREV, navItem(Material.ARROW, ChestUIMsg.NAV_PREV_NAME.content(), NAV_PREV_KEY, null));
         } else {
-            inv.setItem(SLOT_PREV, navItem(Material.GRAY_DYE, "§7已是第一页", null, null));
+            inv.setItem(SLOT_PREV, navItem(Material.GRAY_DYE, ChestUIMsg.NAV_PREV_FIRST.content(), null, null));
         }
         // 整理
-        inv.setItem(SLOT_SORT, navItem(Material.REDSTONE, "§e整理", NAV_SORT_KEY,
-                List.of("§7合并同类堆叠并紧凑排列")));
+        inv.setItem(SLOT_SORT, navItem(Material.REDSTONE, ChestUIMsg.NAV_SORT_NAME.content(), NAV_SORT_KEY,
+                List.of(ChestUIMsg.NAV_SORT_LORE.content())));
         // 中间：页码 + 容量信息
         inv.setItem(SLOT_PAGE, pageInfoItem(page, pageCount));
         // 全部取出
-        inv.setItem(SLOT_WITHDRAW_ALL, navItem(Material.CHEST, "§6全部取出", NAV_WITHDRAW_KEY,
-                List.of("§7把仓库物品取出到背包", "§7背包放不下则掉落在地上")));
+        inv.setItem(SLOT_WITHDRAW_ALL, navItem(Material.CHEST, ChestUIMsg.NAV_WITHDRAW_NAME.content(), NAV_WITHDRAW_KEY,
+                List.of(ChestUIMsg.NAV_WITHDRAW_LORE1.content(), ChestUIMsg.NAV_WITHDRAW_LORE2.content())));
         // 下一页
         if (page < pageCount - 1) {
-            inv.setItem(SLOT_NEXT, navItem(Material.ARROW, "§e下一页", NAV_NEXT_KEY, null));
+            inv.setItem(SLOT_NEXT, navItem(Material.ARROW, ChestUIMsg.NAV_NEXT_NAME.content(), NAV_NEXT_KEY, null));
         } else {
-            inv.setItem(SLOT_NEXT, navItem(Material.GRAY_DYE, "§7已是最后一页", null, null));
+            inv.setItem(SLOT_NEXT, navItem(Material.GRAY_DYE, ChestUIMsg.NAV_NEXT_LAST.content(), null, null));
         }
         // 帮助
-        inv.setItem(SLOT_HELP, navItem(Material.BOOK, "§b操作说明", NAV_HELP_KEY,
-                List.of("§7点击查看操作提示")));
+        inv.setItem(SLOT_HELP, navItem(Material.BOOK, ChestUIMsg.NAV_HELP_NAME.content(), NAV_HELP_KEY,
+                List.of(ChestUIMsg.NAV_HELP_LORE.content())));
         // 右下：升级仓库（lore 实时显示费用与余额）
         inv.setItem(SLOT_UPGRADE, buildUpgradeItem());
     }
 
     private ItemStack buildUpgradeItem() {
         List<String> lore = new ArrayList<>();
-        lore.add("§7点击升级仓库容量");
+        lore.add(ChestUIMsg.NAV_UPGRADE_LORE_CLICK.content());
         if (upgradeCost >= 0 && nextLevelLore >= 0) {
             int nextLv = level + 1;
-            lore.add("§7下一级: §aLv" + nextLv + " §7· §e" + nextLevelLore + " 格");
-            lore.add("§7费用: §6" + formatMoney(upgradeCost) + " 金币");
+            lore.add(ChestUIMsg.NAV_UPGRADE_NEXT_LEVEL.content(nextLv, nextLevelLore));
+            lore.add(ChestUIMsg.NAV_UPGRADE_COST.content(formatMoney(upgradeCost)));
             if (economyReady) {
                 if (balance >= upgradeCost) {
-                    lore.add("§a✔ 余额充足，可升级");
+                    lore.add(ChestUIMsg.NAV_UPGRADE_BALANCE_ENOUGH.content());
                 } else {
-                    lore.add("§c✘ 余额不足 (当前 " + formatMoney((long) balance) + ")");
+                    lore.add(ChestUIMsg.NAV_UPGRADE_BALANCE_INSUFFICIENT.content(formatMoney((long) balance)));
                 }
             } else {
-                lore.add("§7当前余额未知");
+                lore.add(ChestUIMsg.NAV_UPGRADE_BALANCE_UNKNOWN.content());
             }
         } else {
-            lore.add("§7已达最高等级");
+            lore.add(ChestUIMsg.NAV_UPGRADE_MAX_LEVEL.content());
         }
-        return navItem(Material.EXPERIENCE_BOTTLE, "§a升级仓库", NAV_UPGRADE_KEY, lore);
+        return navItem(Material.EXPERIENCE_BOTTLE, ChestUIMsg.NAV_UPGRADE_NAME.content(), NAV_UPGRADE_KEY, lore);
     }
 
     private static String formatMoney(long value) {
@@ -443,13 +443,13 @@ public class Backpack implements InventoryHolder {
     private ItemStack pageInfoItem(int page, int pageCount) {
         ItemStack item = new ItemStack(Material.BOOK);
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(LEGACY.deserialize("§a个人仓库")
+        meta.displayName(LEGACY.deserialize(ChestUIMsg.NAV_PAGE_NAME.content())
                 .decoration(TextDecoration.ITALIC, false));
         meta.lore(List.of(
-                LEGACY.deserialize("§e第 " + (page + 1) + " / " + pageCount + " 页").decoration(TextDecoration.ITALIC, false),
-                LEGACY.deserialize("§7仓库容量: " + usableSlots + " 格").decoration(TextDecoration.ITALIC, false),
-                LEGACY.deserialize("§7已使用: " + getUsedSlots() + " 格").decoration(TextDecoration.ITALIC, false),
-                LEGACY.deserialize("§7当前等级: Lv" + level).decoration(TextDecoration.ITALIC, false)
+                LEGACY.deserialize(ChestUIMsg.NAV_PAGE_LINE.content(page + 1, pageCount)).decoration(TextDecoration.ITALIC, false),
+                LEGACY.deserialize(ChestUIMsg.NAV_PAGE_CAPACITY.content(usableSlots)).decoration(TextDecoration.ITALIC, false),
+                LEGACY.deserialize(ChestUIMsg.NAV_PAGE_USED.content(getUsedSlots())).decoration(TextDecoration.ITALIC, false),
+                LEGACY.deserialize(ChestUIMsg.NAV_PAGE_LEVEL.content(level)).decoration(TextDecoration.ITALIC, false)
         ));
         item.setItemMeta(meta);
         return item;

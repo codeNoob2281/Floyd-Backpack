@@ -3,6 +3,7 @@ package com.floyd.backpack.event;
 import com.floyd.backpack.command.BackpackSubCmdHandler;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.entity.PlaceHolderItem;
+import com.floyd.backpack.message.ChestUIMsg;
 import com.floyd.backpack.message.CommandBackpackUpgradeMsg;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.setting.properties.UpgradeSettings;
@@ -212,13 +213,13 @@ public class BackpackEventListener implements Listener {
      * 仓库操作说明提示（点击底栏「操作说明」按钮时发送）。
      */
     private void sendBackpackHelp(Player player) {
-        player.sendMessage("§6§l个人仓库操作说明");
-        player.sendMessage("§7• §a全部存入 §7: 把背包物品存入仓库(自动合并同类)");
-        player.sendMessage("§7• §e整理 §7: 合并同类堆叠并紧凑排列");
-        player.sendMessage("§7• §6全部取出 §7: 把仓库物品取出到背包");
-        player.sendMessage("§7• §a升级仓库 §7: 花金币扩容(右下角)");
-        player.sendMessage("§7• §c返回 §7: 关闭仓库");
-        player.sendMessage("§e容量随等级提升, 当前 Lv" + playerBackpackManager.getBackpack(player).getLevel());
+        player.sendMessage(ChestUIMsg.NAV_HELP_HEADER.content());
+        player.sendMessage(ChestUIMsg.NAV_HELP_DEPOSIT.content());
+        player.sendMessage(ChestUIMsg.NAV_HELP_SORT.content());
+        player.sendMessage(ChestUIMsg.NAV_HELP_WITHDRAW.content());
+        player.sendMessage(ChestUIMsg.NAV_HELP_UPGRADE.content());
+        player.sendMessage(ChestUIMsg.NAV_HELP_RETURN.content());
+        player.sendMessage(ChestUIMsg.NAV_HELP_CAPACITY.content(playerBackpackManager.getBackpack(player).getLevel()));
     }
 
     private static boolean isPlayerClick(InventoryAction action) {
