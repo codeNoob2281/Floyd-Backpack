@@ -42,7 +42,7 @@ command:
       player-not-found: "§c未找到玩家: {0}。"
       invalid-level: "§c无效等级。必须介于 1 和 {0} 之间。"
 chest-ui:
-  backpack-title: "§6{0}的背包"
+  backpack-title: "§a个人仓库"
   placeholder:
     next-level-slot-name: "§a下一级解锁"
     next-level-slot-lore: "§eShift+左键进行升级"

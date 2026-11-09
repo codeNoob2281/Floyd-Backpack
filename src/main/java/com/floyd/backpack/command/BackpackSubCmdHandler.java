@@ -101,7 +101,7 @@ public class BackpackSubCmdHandler extends AbstractCmdHandler {
     private void openBackpack(CommandSender sender) {
         Player player = (Player) sender;
         Backpack backpack = playerBackpackManager.getBackpack(player);
-        player.openInventory(backpack.getInventory());
+        backpack.openPage(player, backpack.getCurrentPage());
     }
 
 }

@@ -15,7 +15,6 @@ import com.floyd.core.logging.Logger;
 import com.floyd.core.settings.PluginSettingsManager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -132,13 +131,12 @@ public class BackpackClearCmdHandler extends AbstractCmdHandler {
     private int clearBackpack(@NotNull CommandSender sender) {
         Player player = (Player) sender;
         Backpack backpack = playerBackpackManager.getBackpack(player);
-        Inventory inventory = backpack.getInventory();
         int usableSlots = backpack.getUsableSlots();
         int clearItemCount = 0;
         for (int i = 0; i < usableSlots; i++) {
-            ItemStack item = inventory.getItem(i);
+            ItemStack item = backpack.getStoredItem(i);
             if (item != null) {
-                inventory.clear(i);
+                backpack.setStoredItem(i, null);
                 clearItemCount++;
             }
         }

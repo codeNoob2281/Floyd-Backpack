@@ -6,7 +6,7 @@
 
     <groupId>com.codefish.mc</groupId>
     <artifactId>floyd-backpack</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
 
     <name>floyd-backpack</name>
@@ -16,7 +16,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependencies.floyd-core.version>1.0.6</dependencies.floyd-core.version>
         <dependencies.lombok.version>1.18.30</dependencies.lombok.version>
-        <dependencies.paper-api.version>1.20.6-R0.1-SNAPSHOT</dependencies.paper-api.version>
+        <dependencies.paper-api.version>1.21.11-R0.1-SNAPSHOT</dependencies.paper-api.version>
+        <dependencies.vault.version>1.7</dependencies.vault.version>
+        <dependencies.gson.version>2.14.0</dependencies.gson.version>
+        <dependencies.placeholderapi.version>2.11.7</dependencies.placeholderapi.version>
+        <dependencies.adventure.version>5.2.0</dependencies.adventure.version>
+        <dependencies.annotations.version>26.0.2</dependencies.annotations.version>
+        <dependencies.bungeecord-chat.version>1.21-R0.2-deprecated+build.21</dependencies.bungeecord-chat.version>
+        <dependencies.jspecify.version>1.0.0</dependencies.jspecify.version>
     </properties>
 
     <build>
@@ -25,10 +32,16 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
+                <version>3.14.0</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <release>${java.version}</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${dependencies.lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
@@ -63,10 +76,18 @@
             <id>papermc-repo</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
-            <repository>
-                <id>jitpack.io</id>
-                <url>https://jitpack.io</url>
-            </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>codemc-repo</id>
+            <url>https://repo.codemc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -88,11 +109,71 @@
             <version>${dependencies.paper-api.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>net.milkbowl.vault</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>${dependencies.vault.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>bukkit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
         <dependency>
-            <groupId>org.geysermc.geyser</groupId>
-            <artifactId>api</artifactId>
-            <version>2.2.2-SNAPSHOT</version>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${dependencies.gson.version}</version>
+        </dependency>
+
+        <!-- PlaceholderAPI 占位符 API（provided：运行时由服务器插件提供） -->
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>${dependencies.placeholderapi.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bstats</groupId>
+                    <artifactId>bstats-bukkit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.kyori</groupId>
+                    <artifactId>adventure-platform-bukkit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-api</artifactId>
+            <version>${dependencies.adventure.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>${dependencies.annotations.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-serializer-legacy</artifactId>
+            <version>${dependencies.adventure.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.md-5</groupId>
+            <artifactId>bungeecord-chat</artifactId>
+            <version>${dependencies.bungeecord-chat.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+            <version>${dependencies.jspecify.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

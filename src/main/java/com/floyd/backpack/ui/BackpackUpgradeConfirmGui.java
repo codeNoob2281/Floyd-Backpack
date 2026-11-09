@@ -1,12 +1,16 @@
 package com.floyd.backpack.ui;
 
+import com.floyd.backpack.economy.EconomyProvider;
 import com.floyd.backpack.entity.Backpack;
 import com.floyd.backpack.message.ChestUIMsg;
+import com.floyd.backpack.message.CommandBackpackUpgradeMsg;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -43,16 +47,18 @@ public class BackpackUpgradeConfirmGui implements InventoryHolder {
     private final int nextLevel;
     private final int nextUsableSlots;
     private final int oldUsableSlots;
+    private final long cost;
 
     public BackpackUpgradeConfirmGui(Player player, Backpack backpack,
                                      int currentLevel, int nextLevel,
-                                     int oldUsableSlots, int nextUsableSlots) {
+                                     int oldUsableSlots, int nextUsableSlots, long cost) {
         this.player = player;
         this.backpack = backpack;
         this.currentLevel = currentLevel;
         this.nextLevel = nextLevel;
         this.oldUsableSlots = oldUsableSlots;
         this.nextUsableSlots = nextUsableSlots;
+        this.cost = cost;
 
         String title = ChestUIMsg.UPGRADE_CONFIRM_TITLE.content();
         this.inventory = Bukkit.createInventory(this, GUI_SIZE, title);
@@ -61,7 +67,9 @@ public class BackpackUpgradeConfirmGui implements InventoryHolder {
     }
 
     public void open() {
-        player.openInventory(inventory);
+        // 延迟 1 tick 打开，避免在 InventoryClickEvent 内同步打开导致“打开即关闭”
+        org.bukkit.plugin.Plugin plugin = com.floyd.backpack.BackpackPluginAccessor.getPlugin();
+        Bukkit.getScheduler().runTaskLater(plugin, () -> player.openInventory(inventory), 1L);
     }
 
     public void onConfirm(PlayerBackpackManager manager) {
@@ -71,10 +79,35 @@ public class BackpackUpgradeConfirmGui implements InventoryHolder {
         if (backpack.getLevel() != currentLevel) {
             return;
         }
+
+        // 经济扣费：升级前校验余额并扣除
+        if (cost > 0) {
+            Economy economy = EconomyProvider.get();
+            if (economy == null) {
+                player.sendMessage(CommandBackpackUpgradeMsg.UPGRADE_ECONOMY_UNAVAILABLE.content());
+                return;
+            }
+            if (!economy.has(player, cost)) {
+                player.sendMessage(CommandBackpackUpgradeMsg.UPGRADE_INSUFFICIENT_FUNDS.content(economy.format(cost)));
+                return;
+            }
+            EconomyResponse response = economy.withdrawPlayer(player, cost);
+            if (response == null || !response.transactionSuccess()) {
+                player.sendMessage(CommandBackpackUpgradeMsg.UPGRADE_DEDUCT_FAILED.content());
+                return;
+            }
+        }
+
         manager.setBackpackLevel(backpack, nextLevel, nextUsableSlots);
-        player.openInventory(backpack.getInventory());
+        backpack.openPage(player, backpack.getCurrentPage());
 
         player.sendMessage(ChestUIMsg.UPGRADE_CONFIRM_SUCCESS.content(nextLevel, nextUsableSlots));
+        if (cost > 0) {
+            Economy economy = EconomyProvider.get();
+            if (economy != null) {
+                player.sendMessage(CommandBackpackUpgradeMsg.UPGRADE_COST_DEDUCTED.content(economy.format(cost)));
+            }
+        }
         player.playSound(Sound.sound()
                 .type(org.bukkit.Sound.ENTITY_PLAYER_LEVELUP)
                 .build());
@@ -104,9 +137,18 @@ public class BackpackUpgradeConfirmGui implements InventoryHolder {
                 ChestUIMsg.UPGRADE_CONFIRM_NEXT_LV.content(nextLevel),
                 ChestUIMsg.UPGRADE_CONFIRM_NEXT_LV_LORE.content(nextUsableSlots));
 
-        setInfoItem(SLOT_COST_INFO, Material.EMERALD,
-                ChestUIMsg.UPGRADE_CONFIRM_COST_TITLE.content(),
-                List.of(ChestUIMsg.UPGRADE_CONFIRM_COST_PLACEHOLDER.content()));
+        // 费用信息
+        if (cost > 0) {
+            Economy economy = EconomyProvider.get();
+            String costText = economy != null ? economy.format(cost) : String.valueOf(cost);
+            setInfoItem(SLOT_COST_INFO, Material.EMERALD,
+                    ChestUIMsg.UPGRADE_CONFIRM_COST_TITLE.content(),
+                    List.of(ChestUIMsg.UPGRADE_CONFIRM_COST_VALUE.content(costText)));
+        } else {
+            setInfoItem(SLOT_COST_INFO, Material.EMERALD,
+                    ChestUIMsg.UPGRADE_CONFIRM_COST_TITLE.content(),
+                    List.of(ChestUIMsg.UPGRADE_CONFIRM_COST_PLACEHOLDER.content()));
+        }
 
         setButtonItem(SLOT_CANCEL, Material.RED_WOOL,
                 ChestUIMsg.UPGRADE_CONFIRM_CANCEL.content(),

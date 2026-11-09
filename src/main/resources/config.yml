@@ -12,7 +12,7 @@ command:
       confirm-interval: 5000
 i18n:
   # Locale to use for internationalization
-  locale: en
+  locale: zh_cn
 autosave:
   # Enable periodic auto-save of backpack data (prevents data loss on server crash)
   enable: true
@@ -22,17 +22,32 @@ upgrade:
   # Whether backpack upgrade is enabled
   enabled: true
   # Maximum backpack level
-  max-level: 6
-  # Maximum slots
-  max-slots: 54
+  max-level: 10
+  # Maximum slots (hard cap)
+  max-slots: 1024
   # The number of backpack slots corresponding to each level, with index 0 representing level 1
   levels:
-    - 9
-    - 18
-    - 27
-    - 36
-    - 45
-    - 54
+    - 15
+    - 25
+    - 35
+    - 53
+    - 65
+    - 73
+    - 128
+    - 156
+    - 256
+    - 516
+  # Cost to upgrade from L(index+1) to L(index+2). Index 0 = L1->L2 cost, ... index 8 = L9->L10 cost
+  costs:
+    - 50000
+    - 160000
+    - 460000
+    - 510000
+    - 580000
+    - 675000
+    - 712000
+    - 1840000
+    - 2920000
   placeholder-item:
     material: GRAY_STAINED_GLASS_PANE
     next-level-material: LIME_STAINED_GLASS_PANE

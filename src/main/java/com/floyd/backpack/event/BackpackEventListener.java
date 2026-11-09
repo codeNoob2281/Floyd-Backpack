@@ -6,6 +6,7 @@ import com.floyd.backpack.entity.PlaceHolderItem;
 import com.floyd.backpack.message.CommandBackpackUpgradeMsg;
 import com.floyd.backpack.service.PlayerBackpackManager;
 import com.floyd.backpack.setting.properties.UpgradeSettings;
+import com.floyd.backpack.BackpackPluginAccessor;
 import com.floyd.backpack.tools.OpenBackpackTool;
 import com.floyd.backpack.ui.BackpackUpgradeConfirmGui;
 import com.floyd.core.logging.ConsoleLoggerFactory;
@@ -21,9 +22,10 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
-import org.geysermc.geyser.api.GeyserApi;
 
 /**
  * @author floyd
@@ -47,9 +49,47 @@ public class BackpackEventListener implements Listener {
         this.pluginSettingsManager = pluginSettingsManager;
     }
 
+    private static final String PAPI_PLUGIN = "PlaceholderAPI";
+    private boolean placeholderRegistered = false;
+
+    /**
+     * PAPI 启用后再注册扩展（覆盖 PAPI 晚于本插件启用的情况）。
+     */
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPluginEnable(PluginEnableEvent event) {
+        if (!placeholderRegistered && PAPI_PLUGIN.equals(event.getPlugin().getName())) {
+            tryRegisterPlaceholder();
+        }
+    }
+
+    /**
+     * 注册 PlaceholderAPI 变量扩展（幂等）。PAPI 未加载时静默等待（由 onPluginEnable 在 PAPI 启用时触发）。
+     */
+    public void tryRegisterPlaceholder() {
+        if (placeholderRegistered) {
+            return;
+        }
+        if (Bukkit.getPluginManager().getPlugin(PAPI_PLUGIN) != null) {
+            new com.floyd.backpack.placeholder.FloydBackpackPlaceholder().register();
+            placeholderRegistered = true;
+            logger.info("Floyd-Backpack PlaceholderAPI expansion registered.");
+        }
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        givePlayerTools(event.getPlayer());
+        // 不再自动发放背包工具，背包统一由服务器菜单按钮 / /backpack 打开
+        Player player = event.getPlayer();
+        logger.info("Player joined, backpack available via menu or /backpack: [{}]", player.getName());
+        // 进服引导：欢迎消息 + 首次玩家新手提示（延迟1秒发送避开进服刷屏；不自动开菜单/不自动发物品）
+        Bukkit.getScheduler().runTaskLater(BackpackPluginAccessor.getPlugin(), () -> {
+            player.sendMessage("§6§l欢迎来到 §a鱼乐服务器 §6§l！");
+            player.sendMessage("§7输入 §a/menu §7打开主菜单，§a/bp §7打开个人仓库");
+            if (!player.hasPlayedBefore()) {
+                player.sendMessage("§b新手提示：主菜单可传送 / 交易 / 银行 / 声望，仓库可花金币逐级扩容");
+                player.sendMessage("§b遇到问题可在主菜单 → 辅助功能 / 显示设置 中调整，或联系管理员");
+            }
+        }, 20L);
     }
 
     @EventHandler
@@ -66,7 +106,7 @@ public class BackpackEventListener implements Listener {
 
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {
-        givePlayerTools(event.getPlayer());
+        // 不再自动发放背包工具
     }
 
     @EventHandler
@@ -108,13 +148,9 @@ public class BackpackEventListener implements Listener {
 
         if (playerBackpackManager.isBackpackInventory(player, event.getClickedInventory())) {
             ItemStack current = event.getCurrentItem();
+            // 锁定占位符（超出容量的灰色格）不可取、不可放
             if (PlaceHolderItem.isPlaceholder(current)) {
                 event.setCancelled(true);
-                if (PlaceHolderItem.isNextLevelPlaceholder(current)) {
-                    if (isBedrockPlayer(player) ? event.getClick() == ClickType.LEFT : event.getClick() == ClickType.SHIFT_LEFT) {
-                        tryOpenUpgradeConfirm(player);
-                    }
-                }
                 return;
             }
             if (PlaceHolderItem.isPlaceholder(event.getCursor())) {
@@ -129,6 +165,60 @@ public class BackpackEventListener implements Listener {
                 event.setCancelled(true);
             }
         }
+    }
+
+    /**
+     * 背包底栏导航点击：返回 / 翻页 / 升级。
+     * 使用 HIGHEST 优先级，确保先于其他 handler 取消底栏点击，避免导航按钮被取走。
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onBackpackNavClick(InventoryClickEvent event) {
+        Inventory top = event.getView().getTopInventory();
+        if (!(top.getHolder() instanceof Backpack backpack)) {
+            return;
+        }
+        if (event.getClickedInventory() != top) {
+            return;
+        }
+        int slot = event.getRawSlot();
+        if (slot < Backpack.NAV_START) {
+            return;
+        }
+        event.setCancelled(true);
+        Player player = (Player) event.getWhoClicked();
+        if (slot == Backpack.SLOT_RETURN) {
+            player.closeInventory();
+        } else if (slot == Backpack.SLOT_PREV) {
+            backpack.openPage(player, backpack.getCurrentPage() - 1);
+        } else if (slot == Backpack.SLOT_NEXT) {
+            backpack.openPage(player, backpack.getCurrentPage() + 1);
+        } else if (slot == Backpack.SLOT_DEPOSIT_ALL) {
+            backpack.depositAll(player);
+            player.playSound(Sound.sound().type(org.bukkit.Sound.ENTITY_ITEM_PICKUP).build());
+        } else if (slot == Backpack.SLOT_SORT) {
+            backpack.sortItems(player);
+            player.playSound(Sound.sound().type(org.bukkit.Sound.UI_BUTTON_CLICK).build());
+        } else if (slot == Backpack.SLOT_WITHDRAW_ALL) {
+            backpack.withdrawAll(player);
+            player.playSound(Sound.sound().type(org.bukkit.Sound.ENTITY_ITEM_PICKUP).build());
+        } else if (slot == Backpack.SLOT_HELP) {
+            sendBackpackHelp(player);
+        } else if (slot == Backpack.SLOT_UPGRADE) {
+            tryOpenUpgradeConfirm(player);
+        }
+    }
+
+    /**
+     * 仓库操作说明提示（点击底栏「操作说明」按钮时发送）。
+     */
+    private void sendBackpackHelp(Player player) {
+        player.sendMessage("§6§l个人仓库操作说明");
+        player.sendMessage("§7• §a全部存入 §7: 把背包物品存入仓库(自动合并同类)");
+        player.sendMessage("§7• §e整理 §7: 合并同类堆叠并紧凑排列");
+        player.sendMessage("§7• §6全部取出 §7: 把仓库物品取出到背包");
+        player.sendMessage("§7• §a升级仓库 §7: 花金币扩容(右下角)");
+        player.sendMessage("§7• §c返回 §7: 关闭仓库");
+        player.sendMessage("§e容量随等级提升, 当前 Lv" + playerBackpackManager.getBackpack(player).getLevel());
     }
 
     private static boolean isPlayerClick(InventoryAction action) {
@@ -166,6 +256,13 @@ public class BackpackEventListener implements Listener {
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
         if (playerBackpackManager.isBackpackInventory((Player) event.getWhoClicked(), event.getInventory())) {
+            // 不允许拖拽到导航区（底栏）
+            boolean hitsNav = event.getNewItems().keySet().stream()
+                    .anyMatch(s -> s >= Backpack.NAV_START && s < Backpack.GUI_SIZE);
+            if (hitsNav) {
+                event.setCancelled(true);
+                return;
+            }
             // 不允许将tool放入到背包中
             boolean matchTools = event.getNewItems().values().stream()
                     .anyMatch(OpenBackpackTool::matchItemStack);
@@ -201,7 +298,9 @@ public class BackpackEventListener implements Listener {
     public void onBackpackModify(InventoryClickEvent event) {
         if (event.getWhoClicked() instanceof Player player
                 && playerBackpackManager.isBackpackInventory(player, event.getInventory())) {
-            playerBackpackManager.getBackpack(player).markDirty();
+            Backpack backpack = playerBackpackManager.getBackpack(player);
+            backpack.syncFromView(event.getInventory());
+            backpack.markDirty();
         }
     }
 
@@ -212,7 +311,9 @@ public class BackpackEventListener implements Listener {
     public void onBackpackModifyDrag(InventoryDragEvent event) {
         if (event.getWhoClicked() instanceof Player player
                 && playerBackpackManager.isBackpackInventory(player, event.getInventory())) {
-            playerBackpackManager.getBackpack(player).markDirty();
+            Backpack backpack = playerBackpackManager.getBackpack(player);
+            backpack.syncFromView(event.getInventory());
+            backpack.markDirty();
         }
     }
 
@@ -222,8 +323,10 @@ public class BackpackEventListener implements Listener {
      */
     private static boolean isBedrockPlayer(Player player) {
         try {
-            GeyserApi api = GeyserApi.api();
-            return api.isBedrockPlayer(player.getUniqueId());
+            Class<?> clazz = Class.forName("org.geysermc.geyser.api.GeyserApi");
+            Object api = clazz.getMethod("api").invoke(null);
+            return (boolean) clazz.getMethod("isBedrockPlayer", java.util.UUID.class)
+                    .invoke(api, player.getUniqueId());
         } catch (Throwable e) {
             return false;
         }
@@ -254,8 +357,9 @@ public class BackpackEventListener implements Listener {
         }
 
         // 打开升级确认 GUI
+        long cost = playerBackpackManager.getUpgradeCost(currentLevel);
         new BackpackUpgradeConfirmGui(player, backpack, currentLevel, nextLevel,
-                backpack.getUsableSlots(), nextUsableSlots).open();
+                backpack.getUsableSlots(), nextUsableSlots, cost).open();
     }
 
     private void givePlayerTools(Player player) {

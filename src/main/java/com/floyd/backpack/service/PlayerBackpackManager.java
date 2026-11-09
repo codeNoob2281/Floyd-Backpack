@@ -150,11 +150,10 @@ public class PlayerBackpackManager implements InitializingBean, DisposableBean {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("_level", backpack.getLevel());
 
-        Inventory inventory = backpack.getInventory();
         int usableSlots = backpack.getUsableSlots();
 
         for (int i = 0; i < usableSlots; i++) {
-            ItemStack itemStack = inventory.getItem(i);
+            ItemStack itemStack = backpack.getStoredItem(i);
             if (itemStack != null && !PlaceHolderItem.isPlaceholder(itemStack)) {
                 jsonObject.addProperty(String.valueOf(i), ITEM_STACK_SERIALIZER.serialize(itemStack));
             }
@@ -288,7 +287,20 @@ public class PlayerBackpackManager implements InitializingBean, DisposableBean {
             return false;
         }
         Backpack backpack = PLAYER_BACKPACK_MAP.get(getUuid(player));
-        return backpack != null && backpack.getInventory() == clickedInventory;
+        return backpack != null && clickedInventory.getHolder() == backpack;
+    }
+
+    /**
+     * 返回从 currentLevel 升到 currentLevel+1 所需的金币（取自 upgrade.costs）。
+     * 索引 = currentLevel - 1。超过费用表范围视为 0（已满级由调用方拦截）。
+     */
+    public long getUpgradeCost(int currentLevel) {
+        List<Long> costs = pluginSettingsManager.getProperty(UpgradeSettings.UPGRADE_COSTS);
+        int idx = currentLevel - 1;
+        if (idx < 0 || idx >= costs.size()) {
+            return 0;
+        }
+        return costs.get(idx);
     }
 
     /**
@@ -304,12 +316,11 @@ public class PlayerBackpackManager implements InitializingBean, DisposableBean {
 
             if (newUsableSlots < oldUsableSlots) {
                 // 降级：将超出新容量的物品移至溢出映射
-                Inventory inventory = backpack.getInventory();
                 for (int i = newUsableSlots; i < oldUsableSlots; i++) {
-                    ItemStack item = inventory.getItem(i);
+                    ItemStack item = backpack.getStoredItem(i);
                     if (item != null && !PlaceHolderItem.isPlaceholder(item)) {
                         backpack.getOverflowItems().put(i, ITEM_STACK_SERIALIZER.serialize(item));
-                        inventory.clear(i);
+                        backpack.setStoredItem(i, null);
                     }
                 }
             }
@@ -324,13 +335,12 @@ public class PlayerBackpackManager implements InitializingBean, DisposableBean {
 
             if (newUsableSlots > oldUsableSlots) {
                 // 升级：将溢出物品中属于新可用范围的放回 inventory
-                Inventory inventory = backpack.getInventory();
                 Map<Integer, String> overflow = backpack.getOverflowItems();
                 overflow.entrySet().removeIf(entry -> {
                     if (entry.getKey() < newUsableSlots) {
                         ItemStack item = ITEM_STACK_SERIALIZER.deserialize(entry.getValue());
                         if (item != null) {
-                            inventory.setItem(entry.getKey(), item);
+                            backpack.setStoredItem(entry.getKey(), item);
                         }
                         return true;
                     }
@@ -414,7 +424,7 @@ public class PlayerBackpackManager implements InitializingBean, DisposableBean {
                         }
                     }
 
-                    loadedItems.forEach(backpack.getInventory()::setItem);
+                    loadedItems.forEach((slot, item) -> backpack.setStoredItem(slot, item));
                     backpack.getOverflowItems().putAll(overflowItems);
                 }
             } else {

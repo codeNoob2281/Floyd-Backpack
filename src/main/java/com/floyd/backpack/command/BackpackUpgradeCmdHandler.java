@@ -58,9 +58,11 @@ public class BackpackUpgradeCmdHandler extends AbstractCmdHandler {
             return;
         }
 
+        long cost = playerBackpackManager.getUpgradeCost(currentLevel);
+
         // 打开升级确认 GUI（代替直接升级，让玩家确认消耗）
         new BackpackUpgradeConfirmGui(player, backpack, currentLevel, newLevel,
-                backpack.getUsableSlots(), newUsableSlots).open();
+                backpack.getUsableSlots(), newUsableSlots, cost).open();
     }
 
     @SubCommandMapping(commands = "set-level", permission = PermConstant.ADMIN_BACKPACK)

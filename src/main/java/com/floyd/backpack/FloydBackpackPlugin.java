@@ -40,6 +40,8 @@ public class FloydBackpackPlugin extends FloydPlugin {
     protected void initialize() {
         // 注册事件监听器
         registerEventListener();
+        // 注册 PlaceholderAPI 变量扩展（延迟1秒，确保 PAPI 已加载）
+        registerPlaceholderExpansion();
         // 初始化目录
         initDataDirs();
     }
@@ -47,6 +49,13 @@ public class FloydBackpackPlugin extends FloydPlugin {
     private void registerEventListener() {
         BackpackEventListener eventListener = getApplicationContext().getBean(BackpackEventListener.class);
         Bukkit.getPluginManager().registerEvents(eventListener, this);
+    }
+
+    private void registerPlaceholderExpansion() {
+        // 兜底：若 PAPI 已先于本插件启用，立即注册；否则由 BackpackEventListener 的
+        // PluginEnableEvent 在 PAPI 启用时触发注册（避免硬编码延迟导致注册失败）。
+        BackpackEventListener eventListener = getApplicationContext().getBean(BackpackEventListener.class);
+        eventListener.tryRegisterPlaceholder();
     }
 
     @Override
